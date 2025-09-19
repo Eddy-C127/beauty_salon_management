@@ -3,7 +3,7 @@
 
 {
     "name": "Beauty Salon",
-    "version": "18.0.1.0.1",
+    "version": "18.0.1.0.2",
     "summary": """Beauty Salon Management""",
     "author": "SmartGeeks",
     "website": "https://smartgeeks.mx/",

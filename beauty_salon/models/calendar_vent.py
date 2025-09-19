@@ -4,6 +4,22 @@ class CalendarVent(models.Model):
     _inherit = 'calendar.event'
 
     real_employee_id = fields.Many2one('hr.employee', string="Real Employee", domain="[('is_virtual_resource', '=', False)]", tracking=True, )
+    appointment_status = fields.Selection([
+        ('request', 'Request'),
+        ('booked', 'Booked'),
+        ('attended', 'Checked-In'),
+        ('concluded', 'Concluded'),
+        ('no_show', 'No Show'),
+        ('cancelled', 'Cancelled'),
+    ], string="Appointment Status", compute='_compute_appointment_status', store=True, readonly=False, tracking=True)
+
+    @api.depends('appointment_type_id')
+    def _compute_appointment_status(self):
+        for event in self:
+            if not event.appointment_type_id:
+                event.appointment_status = False
+            elif not event.appointment_status:
+                event.appointment_status = 'booked'
 
     @api.onchange('user_id')
     def onchange_user_id_real_employee(self):

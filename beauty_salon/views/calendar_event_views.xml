@@ -34,6 +34,27 @@
                     <span t-esc="real_employee_id ? (real_employee_id[1] || real_employee_id) : ''"/>
                 </li>
             </xpath>
+            <xpath expr="//li[@t-if='appointment_status']" position="replace">
+                <li t-if="appointment_status" class="o_field_selection d-flex align-items-center gap-2 mt-2">
+                    <strong>Status: </strong>
+                    <select t-if="can_edit" class="o_appointment_booking_status o_input">
+                        <option value="request" t-att-selected="appointment_status === 'request'">Request</option>
+                        <option value="booked" t-att-selected="appointment_status === 'booked'">Booked</option>
+                        <option value="attended" t-att-selected="appointment_status === 'attended'">Checked-In</option>
+                        <option value="concluded" t-att-selected="appointment_status === 'concluded'">Concluded</option>
+                        <option value="no_show" t-att-selected="appointment_status === 'no_show'">No Show</option>
+                        <option value="cancelled" t-att-selected="appointment_status === 'cancelled'">Cancelled</option>
+                    </select>
+                    <t t-else="">
+                        <t t-if="appointment_status === 'request'">Request</t>
+                        <t t-elif="appointment_status === 'booked'">Booked</t>
+                        <t t-elif="appointment_status === 'attended'">Checked-In</t>
+                        <t t-elif="appointment_status === 'concluded'">Concluded</t>
+                        <t t-elif="appointment_status === 'no_show'">No Show</t>
+                        <t t-elif="appointment_status === 'cancelled'">Cancelled</t>
+                    </t>
+                </li>
+            </xpath>
         </field>
     </record>
     <record id="view_calendar_event_form_inherit_beauty_salon_extra" model="ir.ui.view">
