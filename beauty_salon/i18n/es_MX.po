@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-17 23:13+0000\n"
-"PO-Revision-Date: 2025-09-17 23:13+0000\n"
+"POT-Creation-Date: 2025-09-19 21:08+0000\n"
+"PO-Revision-Date: 2025-09-19 21:08+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,6 +19,17 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:beauty_salon.view_calendar_event_gantt_inherit_beauty_salon
 msgid "<strong>Real Employee: </strong>"
 msgstr "<strong>Empleado Real: </strong>"
+
+#. module: beauty_salon
+#: model:ir.model,name:beauty_salon.model_appointment_type
+msgid "Appointment Type"
+msgstr "Tipo de cita"
+
+#. module: beauty_salon
+#: model:ir.model.fields,field_description:beauty_salon.field_appointment_type__branch_id
+#: model:ir.model.fields,field_description:beauty_salon.field_sale_order__aux_branch_id
+msgid "Branch"
+msgstr "Sucursal"
 
 #. module: beauty_salon
 #: model:ir.model,name:beauty_salon.model_calendar_event
@@ -62,3 +73,17 @@ msgstr "Reporte de comisión de ventas"
 #: model:ir.model,name:beauty_salon.model_sale_order
 msgid "Sales Order"
 msgstr "Orden de venta"
+
+#. module: beauty_salon
+#: model:ir.model,name:beauty_salon.model_sale_order_line
+msgid "Sales Order Line"
+msgstr "Línea de la orden de venta"
+
+#. module: beauty_salon
+#: model:ir.model.fields,help:beauty_salon.field_appointment_type__branch_id
+msgid ""
+"Warehouse used to manage the stock of products consumed during the "
+"appointment."
+msgstr ""
+"Almacén utilizado para gestionar el stock de productos consumidos durante la "
+"cita."

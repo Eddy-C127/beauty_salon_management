@@ -13,14 +13,5 @@
             </xpath>
         </field>
     </record>
-    <record id="beauty_salon_sale_commission_report_view_list_inherit" model="ir.ui.view">
-        <field name="name">beauty.salon.sale.commission.report.view.list.inherit</field>
-        <field name="model">sale.commission.report</field>
-        <field name="inherit_id" ref="sale_commission.sale_commission_report_view_list"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='user_id']" position="after">
-                <field name="real_employee_id"/>
-            </xpath>
-        </field>
-    </record>
+
 </odoo>

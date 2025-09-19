@@ -17,12 +17,16 @@
         "calendar",
         "appointment_account_payment",
         "hr",
-        "sale_commission"
+        "sale_commission",
+        "appointment",
+        "sale_stock",
     ],
     "data": [
         "views/hr_employee_views.xml",
         "views/calendar_event_views.xml",
         "views/sale_commissions_views.xml",
+        "views/appointment_type_views.xml",
+        "views/sale_order_views.xml",
     ],
     "demo": [],
     "auto_install": False,
