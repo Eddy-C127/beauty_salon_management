@@ -1,0 +1,64 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* beauty_salon
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-17 23:13+0000\n"
+"PO-Revision-Date: 2025-09-17 23:13+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: beauty_salon
+#: model_terms:ir.ui.view,arch_db:beauty_salon.view_calendar_event_gantt_inherit_beauty_salon
+msgid "<strong>Real Employee: </strong>"
+msgstr "<strong>Empleado Real: </strong>"
+
+#. module: beauty_salon
+#: model:ir.model,name:beauty_salon.model_calendar_event
+msgid "Calendar Event"
+msgstr "Evento del calendario"
+
+#. module: beauty_salon
+#: model:ir.model,name:beauty_salon.model_sale_commission_plan_user
+msgid "Commission Plan User"
+msgstr "Plan de comisión del usuario"
+
+#. module: beauty_salon
+#: model:ir.model.fields,field_description:beauty_salon.field_hr_employee__default_real_employee_id
+msgid "Default Real Employee"
+msgstr "Empleado Real Predeterminado"
+
+#. module: beauty_salon
+#: model:ir.model,name:beauty_salon.model_hr_employee
+msgid "Employee"
+msgstr "Empleado"
+
+#. module: beauty_salon
+#: model:ir.model.fields,field_description:beauty_salon.field_hr_employee__is_virtual_resource
+msgid "Is Virtual Resource"
+msgstr "Es Recurso Virtual"
+
+#. module: beauty_salon
+#: model:ir.model.fields,field_description:beauty_salon.field_calendar_event__real_employee_id
+#: model:ir.model.fields,field_description:beauty_salon.field_sale_commission_plan_user__real_employee_id
+#: model:ir.model.fields,field_description:beauty_salon.field_sale_commission_report__real_employee_id
+#: model_terms:ir.ui.view,arch_db:beauty_salon.beauty_salon_sale_commission_report_view_list
+msgid "Real Employee"
+msgstr "Empleado Real"
+
+#. module: beauty_salon
+#: model:ir.model,name:beauty_salon.model_sale_commission_report
+msgid "Sales Commission Report"
+msgstr "Reporte de comisión de ventas"
+
+#. module: beauty_salon
+#: model:ir.model,name:beauty_salon.model_sale_order
+msgid "Sales Order"
+msgstr "Orden de venta"

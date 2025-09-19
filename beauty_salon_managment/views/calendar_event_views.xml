@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="view_calendar_event_form_inherit_beauty_salon" model="ir.ui.view">
+        <field name="name">calendar.event.form.inherit.beauty.salon</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="appointment.calendar_event_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='appointment_status']" position="after">
+                <field name="real_employee_id"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_calendar_event_tree_inherit_beauty_salon" model="ir.ui.view">
+        <field name="name">calendar.event.tree.inherit.beauty.salon</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="appointment.calendar_event_view_tree_booking"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='attendee_ids']" position="after">
+                <field name="real_employee_id"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_calendar_event_gantt_inherit_beauty_salon" model="ir.ui.view">
+        <field name="name">calendar.event.gantt.inherit.beauty.salon</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="appointment.calendar_event_view_gantt_booking_resource"/>
+        <field name="arch" type="xml">
+            <xpath expr="//gantt" position="inside">
+                <field name="real_employee_id"/>
+            </xpath>
+            <xpath expr="//templates/div[@t-name='gantt-popover']/ul" position="inside">
+                <li t-if="real_employee_id">
+                    <strong>Real Employee: </strong>
+                    <span t-esc="real_employee_id ? (real_employee_id[1] || real_employee_id) : ''"/>
+                </li>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_calendar_event_form_inherit_beauty_salon_extra" model="ir.ui.view">
+        <field name="name">calendar.event.form.inherit.beauty.salon.extra</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="appointment.calendar_event_view_form_gantt_booking"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='appointment_status']" position="after">
+                <field name="real_employee_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
