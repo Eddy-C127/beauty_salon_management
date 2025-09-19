@@ -1,1 +1,1 @@
-# beauty_salon
+# beauty_salon_management
