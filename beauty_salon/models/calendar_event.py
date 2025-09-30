@@ -30,9 +30,11 @@ class CalendarVent(models.Model):
 
     @api.onchange('real_employee_id')
     def onchange_real_employee_id(self):
-        so = self.sale_order_line_ids[0].order_id
-        if self.real_employee_id and so:
-            so.write({'user_id': self.real_employee_id.user_id.id})
+        # ✅ Verificar que existan líneas de orden antes de acceder
+        if self.real_employee_id and self.sale_order_line_ids:
+            so = self.sale_order_line_ids[0].order_id
+            if so:
+                so.write({'user_id': self.real_employee_id.user_id.id})
 
     @api.model_create_multi
     def create(self, values):
