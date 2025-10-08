@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Los campos Selection se actualizan automáticamente con selection_add
+         No es necesario modificar vistas, pero agregamos información contextual -->
+    
+    <record id="sale_commission_plan_view_form_inherit" model="ir.ui.view">
+        <field name="name">sale.commission.plan.view.form.inherit.beauty</field>
+        <field name="model">sale.commission.plan</field>
+        <field name="inherit_id" ref="sale_commission.sale_commission_plan_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar una página informativa al final del notebook -->
+            <notebook name="main_book" position="inside">
+                <page string="Beauty Salon Info" name="beauty_salon_info" groups="base.group_no_one">
+                    <group>
+                        <group>
+                            <div class="alert alert-info" role="alert">
+                                <h4 class="alert-heading">📊 Nuevos Tipos de Cálculo</h4>
+                                <hr/>
+                                <p><strong>Amount Sold - Fully Invoiced:</strong></p>
+                                <p class="mb-0">Calcula comisiones basadas en el monto de órdenes de venta que estén confirmadas (state='sale') Y totalmente facturadas (invoice_status='invoiced').</p>
+                            </div>
+                        </group>
+                        <group>
+                            <div class="alert alert-info" role="alert">
+                                <h4 class="alert-heading">📦 Quantity Sold - Fully Invoiced</h4>
+                                <hr/>
+                                <p><strong>Quantity Sold - Fully Invoiced:</strong></p>
+                                <p class="mb-0">Calcula comisiones basadas en la cantidad de productos en órdenes de venta que estén confirmadas (state='sale') Y totalmente facturadas (invoice_status='invoiced').</p>
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <div class="alert alert-warning" role="alert">
+                            <h5>⚠️ Importante:</h5>
+                            <ul>
+                                <li>Estos tipos <strong>NO</strong> consideran órdenes sin facturar (invoice_status='to_invoice')</li>
+                                <li>Estos tipos <strong>NO</strong> consideran órdenes parcialmente facturadas (invoice_status='partial')</li>
+                                <li>Solo se calculan comisiones cuando la orden está <strong>100% facturada</strong></li>
+                            </ul>
+                        </div>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

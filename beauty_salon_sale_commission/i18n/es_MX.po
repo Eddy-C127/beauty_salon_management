@@ -1,0 +1,99 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * beauty_salon_sale_commission
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-08 15:00:00+0000\n"
+"PO-Revision-Date: 2025-01-08 15:00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: beauty_salon_sale_commission
+#: model:ir.model.fields.selection,name:beauty_salon_sale_commission.selection__sale_commission_achievement__type__amount_sold_invoiced
+#: model:ir.model.fields.selection,name:beauty_salon_sale_commission.selection__sale_commission_plan_achievement__type__amount_sold_invoiced
+msgid "Amount Sold - Fully Invoiced"
+msgstr "Monto Vendido - Totalmente Facturado"
+
+#. module: beauty_salon_sale_commission
+#: model:ir.model.fields.selection,name:beauty_salon_sale_commission.selection__sale_commission_achievement__type__qty_sold_invoiced
+#: model:ir.model.fields.selection,name:beauty_salon_sale_commission.selection__sale_commission_plan_achievement__type__qty_sold_invoiced
+msgid "Quantity Sold - Fully Invoiced"
+msgstr "Cantidad Vendida - Totalmente Facturada"
+
+#. module: beauty_salon_sale_commission
+#: model_terms:ir.ui.view,arch_db:beauty_salon_sale_commission.sale_commission_plan_view_form_inherit
+msgid "Beauty Salon Info"
+msgstr "Información Beauty Salon"
+
+#. module: beauty_salon_sale_commission
+#: model_terms:ir.ui.view,arch_db:beauty_salon_sale_commission.sale_commission_plan_view_form_inherit
+msgid "📊 Nuevos Tipos de Cálculo"
+msgstr "📊 New Calculation Types"
+
+#. module: beauty_salon_sale_commission
+#: model_terms:ir.ui.view,arch_db:beauty_salon_sale_commission.sale_commission_plan_view_form_inherit
+msgid "Amount Sold - Fully Invoiced:"
+msgstr "Monto Vendido - Totalmente Facturado:"
+
+#. module: beauty_salon_sale_commission
+#: model_terms:ir.ui.view,arch_db:beauty_salon_sale_commission.sale_commission_plan_view_form_inherit
+msgid "Calcula comisiones basadas en el monto de órdenes de venta que estén confirmadas (state='sale') Y totalmente facturadas (invoice_status='invoiced')."
+msgstr "Calcula comisiones basadas en el monto de órdenes de venta que estén confirmadas (estado='sale') Y totalmente facturadas (estado_factura='invoiced')."
+
+#. module: beauty_salon_sale_commission
+#: model_terms:ir.ui.view,arch_db:beauty_salon_sale_commission.sale_commission_plan_view_form_inherit
+msgid "📦 Quantity Sold - Fully Invoiced"
+msgstr "📦 Cantidad Vendida - Totalmente Facturada"
+
+#. module: beauty_salon_sale_commission
+#: model_terms:ir.ui.view,arch_db:beauty_salon_sale_commission.sale_commission_plan_view_form_inherit
+msgid "Quantity Sold - Fully Invoiced:"
+msgstr "Cantidad Vendida - Totalmente Facturada:"
+
+#. module: beauty_salon_sale_commission
+#: model_terms:ir.ui.view,arch_db:beauty_salon_sale_commission.sale_commission_plan_view_form_inherit
+msgid "Calcula comisiones basadas en la cantidad de productos en órdenes de venta que estén confirmadas (state='sale') Y totalmente facturadas (invoice_status='invoiced')."
+msgstr "Calcula comisiones basadas en la cantidad de productos en órdenes de venta que estén confirmadas (estado='sale') Y totalmente facturadas (estado_factura='invoiced')."
+
+#. module: beauty_salon_sale_commission
+#: model_terms:ir.ui.view,arch_db:beauty_salon_sale_commission.sale_commission_plan_view_form_inherit
+msgid "⚠️ Importante:"
+msgstr "⚠️ Importante:"
+
+#. module: beauty_salon_sale_commission
+#: model_terms:ir.ui.view,arch_db:beauty_salon_sale_commission.sale_commission_plan_view_form_inherit
+msgid "Estos tipos <strong>NO</strong> consideran órdenes sin facturar (invoice_status='to_invoice')"
+msgstr "Estos tipos <strong>NO</strong> consideran órdenes sin facturar (estado_factura='to_invoice')"
+
+#. module: beauty_salon_sale_commission
+#: model_terms:ir.ui.view,arch_db:beauty_salon_sale_commission.sale_commission_plan_view_form_inherit
+msgid "Estos tipos <strong>NO</strong> consideran órdenes parcialmente facturadas (invoice_status='partial')"
+msgstr "Estos tipos <strong>NO</strong> consideran órdenes parcialmente facturadas (estado_factura='partial')"
+
+#. module: beauty_salon_sale_commission
+#: model_terms:ir.ui.view,arch_db:beauty_salon_sale_commission.sale_commission_plan_view_form_inherit
+msgid "Solo se calculan comisiones cuando la orden está <strong>100% facturada</strong>"
+msgstr "Solo se calculan comisiones cuando la orden está <strong>100% facturada</strong>"
+
+#. module: beauty_salon_sale_commission
+#: model:ir.model,name:beauty_salon_sale_commission.model_sale_commission_achievement
+msgid "Manual Commission Achievement"
+msgstr "Ajuste Manual de Comisión"
+
+#. module: beauty_salon_sale_commission
+#: model:ir.model,name:beauty_salon_sale_commission.model_sale_commission_plan_achievement
+msgid "Commission Plan Achievement"
+msgstr "Logro del Plan de Comisión"
+
+#. module: beauty_salon_sale_commission
+#: model:ir.model,name:beauty_salon_sale_commission.model_sale_commission_achievement_report
+msgid "Sales Achievement Report"
+msgstr "Reporte de Logros de Ventas"

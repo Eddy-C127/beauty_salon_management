@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="beauty_salon_sale_commission_report_view_list" model="ir.ui.view">
+        <field name="name">beauty.salon.sale.commission.report.view.list</field>
+        <field name="model">sale.commission.report</field>
+        <field name="inherit_id" ref="sale_commission.sale_commission_report_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="real_employee_id"/>
+            </xpath>
+            <xpath expr="//filter[@name='group_by_salesperson']" position="after">
+                <filter string="Real Employee" name="group_by_real_employee" context="{'group_by':'real_employee_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
