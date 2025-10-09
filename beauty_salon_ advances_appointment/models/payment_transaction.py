@@ -12,21 +12,21 @@ class PaymentTransaction(models.Model):
             calendar_booking_ids = confirmed_orders.order_line[0].calendar_booking_ids
             if calendar_booking_ids and calendar_booking_ids.appointment_type_id:
                 appointment_type_id = calendar_booking_ids.appointment_type_id
-                if appointment_type_id and appointment_type_id.payment_way:
-                    payment_way = appointment_type_id.payment_way
+                if appointment_type_id and appointment_type_id.advance_type:
+                    advance_type = appointment_type_id.advance_type
                     ctx = {
                         'active_model': 'sale.order',
                         'active_ids': confirmed_orders.ids,
                         'active_id': confirmed_orders.id,
                     }
-                    if payment_way == 'advance_percentage':
+                    if advance_type == 'advance_percentage':
                         downpayment = self.env['sale.advance.payment.inv'].with_context(ctx).create({
                             'advance_payment_method': 'percentage',
                             'amount': appointment_type_id.advance_percentage,
                             'fixed_amount':1,
                         })
                         downpayment.create_invoices()
-                    if payment_way == 'fixed_import':
+                    if advance_type == 'fixed_import':
                         downpayment = self.env['sale.advance.payment.inv'].with_context(ctx).create({
                             'advance_payment_method': 'fixed',
                             'amount': appointment_type_id.fixed_import,

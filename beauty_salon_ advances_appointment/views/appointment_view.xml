@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="advances_appointment_payment_form" model="ir.ui.view">
+        <field name="name">advances_appointment_payment.form</field>
+        <field name="model">appointment.type</field>
+        <field name="inherit_id" ref="appointment.appointment_type_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='options_left_details']" position="inside">
+                <field name="advance_type"/>
+                <field invisible="advance_type==False or advance_type=='fixed_import'" name="advance_percentage" required=" advance_type!=False and advance_type=='advance_percentage'"/>
+                <field invisible="advance_type==False or advance_type=='advance_percentage'" name="fixed_import" required="advance_type!=False and advance_type=='fixed_import'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

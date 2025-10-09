@@ -26,6 +26,6 @@ class SaleOrder(models.Model):
             calendar_booking_ids = self.order_line[0].calendar_booking_ids
             if calendar_booking_ids and calendar_booking_ids.appointment_type_id:
                 appointment_type_id = calendar_booking_ids.appointment_type_id
-                if appointment_type_id and appointment_type_id.payment_way:
+                if appointment_type_id and appointment_type_id.advance_type:
                     has_advance_appointment = True
         return has_advance_appointment

@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "advances_appointment_module",
+    'name': "Beauty Salon Advances Appointment Module",
 
-    'summary': "Short (1 phrase/line) summary of the module's purpose",
+    'summary': "Install Beauty Salon Advances Appointment Module",
 
     'description': """
 Long description of module's purpose
     """,
 
-    'author': "My Company",
-    'website': "https://www.yourcompany.com",
+    'author': "Smargeeks",
+    'website': "smargeeks.mx",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Uncategorized',
-    'version': '18.0.1.0.3',
+    'version': '18.0.1.0.1',
 
     # any module necessary for this one to work correctly
     'depends': ['website_sale','payment','appointment'],
@@ -26,10 +26,4 @@ Long description of module's purpose
         'views/appointment_view.xml',
         'views/sale_portal_view.xml',
     ],
-    # 'assets': {
-    #     'web.assets_frontend': [
-    #         'advances_appointment_module/static/src/js/appointment.js',
-    #         'advances_appointment_module/static/src/js/payment_form.js',
-    #     ],
-    # },
 }

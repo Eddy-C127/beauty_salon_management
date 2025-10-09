@@ -3,7 +3,7 @@
     <template id="total_inherit" inherit_id="website_sale.total">
         <xpath expr="//tr[@id='order_total_taxes']" position="after">
             <t t-set="calendar_booking_ids" t-value="website_sale_order.website_order_line[0].calendar_booking_ids.appointment_type_id"/>
-            <t t-if="calendar_booking_ids.payment_way and calendar_booking_ids.payment_way=='advance_percentage'">
+            <t t-if="calendar_booking_ids.advance_type and calendar_booking_ids.advance_type=='advance_percentage'">
                 <tr id="tr_use_advance_percentage">
                     <td class="text-muted border-0 ps-0 pt-0 pb-3" colspan="2" id="td_use_advance_percentage">
                         <strong style="color: red;">Anticipo 
@@ -19,7 +19,7 @@
                     </td>
                 </tr>
             </t>
-            <t t-if="calendar_booking_ids.payment_way and calendar_booking_ids.payment_way=='fixed_import'">
+            <t t-if="calendar_booking_ids.advance_type and calendar_booking_ids.advance_type=='fixed_import'">
                 <tr id="tr_use_advance_percentage">
                     <td class="text-muted border-0 ps-0 pt-0 pb-3" colspan="2" id="td_use_advance_percentage">
                         <strong style="color: red;">Anticipo a pagar 
@@ -47,14 +47,14 @@
         <xpath expr="//div[2]/div[1]" position="after">
             <!-- 
         <t t-set="calendar_booking_ids" t-value="website_sale_order.website_order_line.calendar_booking_ids.appointment_type_id"/>-->
-            <t t-if="appointment_type.payment_way and appointment_type.payment_way=='advance_percentage'">
+            <t t-if="appointment_type.advance_type and appointment_type.advance_type=='advance_percentage'">
                 <div class="d-flex py-1 px-0 bg-transparent o-cc1-text border-0">
                     <i class="fa fa-calendar fa-fw me-2 mt-1 text-muted"/>
                     <strong style="color: red;">Aparta con   
                         $<span style="{color:red;}" t-esc="'%.2f'% (appointment_type.product_lst_price*(appointment_type.advance_percentage)/100)"/></strong>
                 </div>
             </t>
-            <t t-if="appointment_type.payment_way and appointment_type.payment_way=='fixed_import'">
+            <t t-if="appointment_type.advance_type and appointment_type.advance_type=='fixed_import'">
                 <div class="d-flex py-1 px-0 bg-transparent o-cc1-text border-0">
                     <i class="fa fa-calendar fa-fw me-2 mt-1 text-muted"/>
                     <strong style="color: red;">Aparta con   
