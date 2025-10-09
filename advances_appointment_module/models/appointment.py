@@ -8,3 +8,8 @@ class AppointmentType(models.Model):
 
     apply_advance = fields.Boolean()
     advance_percentage = fields.Integer()
+    fixed_import = fields.Float()
+    payment_way = fields.Selection([
+        ('fixed_import','Fixed Import'),
+        ('advance_percentage','Advance Percentage'),
+    ])

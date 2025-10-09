@@ -7,8 +7,9 @@
         <field name="arch" type="xml">
             <!-- <xpath expr="//label[@for='has_payment_step']/div[1]" position="after"><div><div class="o_row mw-75 mw-md-100"><field name="apply_advance"/><field name="advance_percentage" invisible="apply_advance==False"/></div></div></xpath>-->
             <xpath expr="//group[@name='options_left_details']" position="inside">
-                <field name="apply_advance"/>
-                <field invisible="apply_advance==False" name="advance_percentage"/>
+                <field name="payment_way"/>
+                <field invisible="payment_way==False or payment_way=='fixed_import'" name="advance_percentage" required=" payment_way!=False and payment_way=='advance_percentage'"/>
+                <field invisible="payment_way==False or payment_way=='advance_percentage'" name="fixed_import" required="payment_way!=False and payment_way=='fixed_import'"/>
             </xpath>
         </field>
     </record>

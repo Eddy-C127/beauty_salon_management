@@ -36,11 +36,17 @@ class AppointmentPortal(payment_portal.PaymentPortal):
         calendar_booking_ids = so.order_line[0].calendar_booking_ids
         if calendar_booking_ids and calendar_booking_ids.appointment_type_id:
             appointment_type_id = calendar_booking_ids.appointment_type_id
-            if appointment_type_id and appointment_type_id.advance_percentage:
-                amount = tx_sudo.amount*(appointment_type_id.advance_percentage/100)
-                tx_sudo.write({
-                    'amount': amount 
-                })
+            payment_way = appointment_type_id.payment_way
+            if appointment_type_id and payment_way:
+                if payment_way == 'advance_percentage':
+                    amount = tx_sudo.amount*(appointment_type_id.advance_percentage/100)
+                    tx_sudo.write({
+                        'amount': amount,
+                    })
+                if payment_way == 'fixed_import':
+                    tx_sudo.write({
+                        'amount': appointment_type_id.fixed_import, 
+                    })
         return tx_sudo
 
 
