@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ========================================== -->
+    <!-- VISTA FORM PRINCIPAL - APPOINTMENT -->
+    <!-- Heredamos de la vista de beauty_salon -->
+    <!-- ========================================== -->
+    
+    <record id="view_calendar_event_form_survey_inherit" model="ir.ui.view">
+        <field name="name">calendar.event.form.survey.inherit</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="beauty_salon.view_calendar_event_form_inherit_beauty_salon"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar badges de estado en header -->
+            <xpath expr="//header" position="inside">
+                <field name="survey_status" widget="badge" 
+                    invisible="survey_status == 'pending'"
+                    decoration-info="survey_status == 'sent'"
+                    decoration-success="survey_status == 'positive'"
+                    decoration-danger="survey_status == 'negative'"
+                    decoration-warning="survey_status == 'completed'"/>
+                    
+                <field name="warranty_status" widget="badge"
+                    invisible="warranty_status == 'not_required'"
+                    decoration-warning="warranty_status == 'pending_approval'"
+                    decoration-success="warranty_status in ['approved', 'completed']"
+                    decoration-danger="warranty_status == 'rejected'"/>
+                
+                <!-- NUEVOS BOTONES DE GARANTÍA -->
+                <button name="action_approve_warranty"
+                        string="Aprobar Garantía"
+                        type="object"
+                        class="btn-success"
+                        invisible="warranty_status != 'pending_approval'"
+                        groups="beauty_salon_survey.group_beauty_survey_manager"/>
+                
+                <button name="action_reject_warranty"
+                        string="Rechazar Garantía"
+                        type="object"
+                        class="btn-danger"
+                        invisible="warranty_status != 'pending_approval'"
+                        groups="beauty_salon_survey.group_beauty_survey_manager"/>
+                
+                <button name="action_create_warranty_appointment"
+                        string="Crear Cita de Garantía"
+                        type="object"
+                        class="btn-primary"
+                        invisible="warranty_status != 'approved' or warranty_appointment_id"
+                        groups="beauty_salon_survey.group_beauty_survey_manager"/>
+            </xpath>
+            
+            <!-- Agregar campos inline después de sale_order_id -->
+            <xpath expr="//field[@name='sale_order_id']" position="after">
+                
+                <!-- Campos de encuesta -->
+                <separator string="📊 Encuesta de Satisfacción" colspan="2"/>
+                <field name="survey_id" options="{'no_create': True}"/>
+                <field name="survey_status"/>
+                <field name="survey_url" widget="url" readonly="1" invisible="not survey_url"/>  ← AGREGAR ESTA LÍNEA
+                <field name="survey_score_display" readonly="1" invisible="not survey_score"/>
+                <field name="survey_sent_date" invisible="not survey_sent_date"/>
+                
+                <!-- Campos de garantía -->
+                <separator string="🔧 Garantía" colspan="2" invisible="warranty_status == 'not_required'"/>
+                <field name="is_warranty" invisible="1"/>
+                <field name="warranty_status" invisible="warranty_status == 'not_required'"/>
+                <field name="original_appointment_id" 
+                       invisible="not is_warranty"
+                       options="{'no_create': True}"/>
+                <field name="warranty_appointment_id"
+                       invisible="is_warranty or not warranty_appointment_id"
+                       options="{'no_create': True}"/>
+                <field name="warranty_deadline"
+                    invisible="warranty_status not in ['pending_approval', 'approved']"
+                    readonly="warranty_status != 'approved'"
+                    groups="beauty_salon_survey.group_beauty_survey_manager"/>
+                
+            </xpath>
+            
+            <!-- AGREGAR TAB AL NOTEBOOK -->
+            <xpath expr="//form[1]/sheet[1]/notebook[1]" position="inside">
+                <page string="Encuesta &amp; Garantía" name="survey_warranty_tab">
+                    <group>
+                        <group string="📊 Información de Encuesta">
+                            <field name="survey_response_id" 
+                                   readonly="1"
+                                   invisible="not survey_response_id"
+                                   options="{'no_open': True}"/>
+                            <field name="survey_token" 
+                                   readonly="1" 
+                                   invisible="not survey_token"
+                                   groups="base.group_no_one"/>
+                        </group>
+                        
+                        <group string="🔧 Notas de Garantía">
+                            <field name="warranty_approved_by"
+                                   invisible="not warranty_approved_by"/>
+                            <field name="warranty_notes" 
+                                   nolabel="1"
+                                   placeholder="Escribe notas internas..."/>
+                        </group>
+                    </group>
+                    
+                    <group string="💬 Comentarios del Cliente" 
+                           invisible="not survey_comments">
+                        <field name="survey_comments" 
+                               nolabel="1" 
+                               readonly="1"
+                               widget="text"/>
+                    </group>
+                </page>
+            </xpath>
+            
+        </field>
+    </record>
+    
+    <!-- ========================================== -->
+    <!-- VISTA FORM GANTT BOOKING -->
+    <!-- ========================================== -->
+    
+    <record id="view_calendar_event_form_gantt_survey_inherit" model="ir.ui.view">
+        <field name="name">calendar.event.form.gantt.survey.inherit</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="beauty_salon.view_calendar_event_form_inherit_beauty_salon_gantt"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar campos de encuesta después de sale_order_id -->
+            <xpath expr="//field[@name='sale_order_id']" position="after">
+                <field name="survey_status"/>
+                <field name="survey_score" widget="progressbar" invisible="not survey_score"/>
+                <field name="is_warranty"/>
+                <field name="warranty_status" invisible="warranty_status == 'not_required'"/>
+            </xpath>
+            
+        </field>
+    </record>
+    
+    <!-- ========================================== -->
+    <!-- VISTA TREE -->
+    <!-- ========================================== -->
+    
+    <record id="view_calendar_event_tree_survey_inherit" model="ir.ui.view">
+        <field name="name">calendar.event.tree.survey.inherit</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="beauty_salon.view_calendar_event_tree_inherit_beauty_salon"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar después de sale_order_id que ya existe -->
+            <xpath expr="//field[@name='sale_order_id']" position="after">
+                <field name="survey_status" optional="show" widget="badge"/>
+                <field name="survey_score" optional="hide" widget="progressbar"/>
+                <field name="warranty_status" optional="hide"/>
+                <field name="is_warranty" optional="hide"/>
+            </xpath>
+            
+        </field>
+    </record>
+    
+    <!-- ========================================== -->
+    <!-- VISTA GANTT (Popover) -->
+    <!-- ========================================== -->
+    
+    <record id="view_calendar_event_gantt_survey_inherit" model="ir.ui.view">
+        <field name="name">calendar.event.gantt.survey.inherit</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="beauty_salon.view_calendar_event_gantt_inherit_beauty_salon"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar campos al gantt para disponibilidad -->
+            <xpath expr="//gantt" position="inside">
+                <field name="survey_status"/>
+                <field name="survey_score"/>
+                <field name="warranty_status"/>
+                <field name="is_warranty"/>
+            </xpath>
+            
+            <!-- Agregar info al popover después de Orden de Venta -->
+            <xpath expr="//templates/div[@t-name='gantt-popover']/ul/li[last()]" position="after">
+                
+                <li t-if="survey_status and survey_status !== 'pending'">
+                    <strong>Encuesta: </strong>
+                    <t t-if="survey_status === 'positive'">
+                        <span class="text-success">✓ Positiva</span>
+                    </t>
+                    <t t-elif="survey_status === 'negative'">
+                        <span class="text-danger">⚠ Negativa</span>
+                    </t>
+                    <t t-elif="survey_status === 'sent'">
+                        <span class="text-warning">⏳ Enviada</span>
+                    </t>
+                    <t t-elif="survey_status === 'completed'">
+                        <span class="text-info">✓ Completada</span>
+                    </t>
+                </li>
+                
+                <li t-if="survey_score">
+                    <strong>Calificación: </strong>
+                    <span t-esc="survey_score"/> / 5.0
+                </li>
+                
+                <li t-if="is_warranty">
+                    <strong class="text-warning">🔧 ES GARANTÍA</strong>
+                </li>
+                
+            </xpath>
+            
+            <!-- Agregar nuevo estado al select (warranty_completed) -->
+            <xpath expr="//select[@class='o_appointment_booking_status o_input']" position="inside">
+                <option value="warranty_completed" t-att-selected="appointment_status === 'warranty_completed'">Warranty Completed</option>
+            </xpath>
+            
+            <!-- Agregar al texto readonly también -->
+            <xpath expr="//li[@t-if='appointment_status']/t[@t-else]" position="inside">
+                <t t-elif="appointment_status === 'warranty_completed'">Warranty Completed</t>
+            </xpath>
+            
+        </field>
+    </record>
+
+</odoo>

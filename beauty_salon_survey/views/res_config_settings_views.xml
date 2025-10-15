@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ========================================== -->
+    <!-- EXTENSIÓN DE SETTINGS -->
+    <!-- ========================================== -->
+    
+    <record id="res_config_settings_view_form_inherit_survey" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.survey</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar nuestra app en Settings -->
+            <xpath expr="//form" position="inside">
+                
+                <app string="Beauty Salon Survey" name="beauty_salon_survey" groups="beauty_salon_survey.group_beauty_survey_manager">
+                    
+                    <!-- BLOQUE 1: UMBRALES -->
+                    <block title="Umbrales de Calificación" name="survey_thresholds">
+                        <setting help="Define qué calificaciones se consideran positivas o negativas">
+                            <label for="survey_negative_threshold" string="Umbral Negativo"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <label for="survey_negative_threshold" class="col-lg-3 o_light_label"/>
+                                    <field name="survey_negative_threshold" class="oe_inline"/>
+                                    <span class="ml-2">Calificaciones ≤ este valor son NEGATIVAS</span>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="survey_positive_threshold" string="Umbral Positivo"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <label for="survey_positive_threshold" class="col-lg-3 o_light_label"/>
+                                    <field name="survey_positive_threshold" class="oe_inline"/>
+                                    <span class="ml-2">Calificaciones ≥ este valor son POSITIVAS</span>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <div class="alert alert-info mt-3" role="alert">
+                            <p class="mb-0">
+                                <strong>Ejemplo:</strong> Con umbral negativo en 3.0 y positivo en 4.0:<br/>
+                                • 1-3 = <span class="badge badge-danger">Negativas</span><br/>
+                                • 4-5 = <span class="badge badge-success">Positivas</span><br/>
+                                • Entre ambos = Neutral
+                            </p>
+                        </div>
+                    </block>
+                    
+                    <!-- BLOQUE 2: PENALIZACIONES -->
+                    <block title="Penalizaciones por Encuesta Negativa" name="survey_penalties">
+                        <setting help="Define cuánto se resta de la comisión cuando la encuesta es negativa">
+                            <label for="survey_negative_penalty_type" string="Tipo de Penalización"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <label for="survey_negative_penalty_type" class="col-lg-3 o_light_label"/>
+                                    <field name="survey_negative_penalty_type" widget="radio" class="oe_inline"/>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="survey_negative_commission_penalty" class="col-lg-3 o_light_label">Monto/Porcentaje</label>
+                                    <field name="survey_negative_commission_penalty" class="oe_inline"/>
+                                    <span class="ml-2" invisible="survey_negative_penalty_type != 'percentage'">%</span>
+                                    <span class="ml-2" invisible="survey_negative_penalty_type != 'fixed'">MXN</span>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- BLOQUE 3: BONUS (OPCIONAL) -->
+                    <block title="Bonus por Encuesta Positiva (Opcional)" name="survey_bonus">
+                        <setting>
+                            <label for="survey_enable_positive_bonus" string="Activar Bonus"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <field name="survey_enable_positive_bonus"/>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting invisible="not survey_enable_positive_bonus">
+                            <label for="survey_positive_bonus_type" string="Tipo de Bonus"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <label for="survey_positive_bonus_type" class="col-lg-3 o_light_label"/>
+                                    <field name="survey_positive_bonus_type" widget="radio" class="oe_inline"/>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="survey_positive_commission_bonus" class="col-lg-3 o_light_label">Monto/Porcentaje</label>
+                                    <field name="survey_positive_commission_bonus" class="oe_inline"/>
+                                    <span class="ml-2" invisible="survey_positive_bonus_type != 'percentage'">%</span>
+                                    <span class="ml-2" invisible="survey_positive_bonus_type != 'fixed'">MXN</span>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- BLOQUE 4: GARANTÍAS -->
+                    <block title="Configuración de Garantías" name="survey_warranties">
+                        <setting>
+                            <label for="survey_warranty_deadline_days" string="Días Límite"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <label for="survey_warranty_deadline_days" class="col-lg-3 o_light_label"/>
+                                    <field name="survey_warranty_deadline_days" class="oe_inline"/>
+                                    <span class="ml-2">días para agendar garantía</span>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="survey_auto_create_warranty" string="Crear Automáticamente"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <field name="survey_auto_create_warranty"/>
+                                    <span class="ml-2">Crear actividad de aprobación automáticamente</span>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="survey_warranty_approval_user_id" string="Gerente (Aprobación)"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <field name="survey_warranty_approval_user_id" class="oe_inline" options="{'no_create': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="survey_supervisor_user_id" string="Supervisor (Escalación)"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <field name="survey_supervisor_user_id" class="oe_inline" options="{'no_create': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- BLOQUE 5: ENCUESTAS -->
+                    <block title="Encuestas por Defecto" name="survey_defaults">
+                        <setting>
+                            <label for="survey_default_service_survey_id" string="Encuesta de Servicio"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <field name="survey_default_service_survey_id" class="oe_inline" options="{'no_create': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+                        
+                        <setting>
+                            <label for="survey_default_warranty_survey_id" string="Encuesta de Garantía"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <field name="survey_default_warranty_survey_id" class="oe_inline" options="{'no_create': True}"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                    <!-- BLOQUE 6: APLICACIÓN DE COMISIONES -->
+                    <block title="Aplicación de Ajustes de Comisión" name="survey_commission_rules">
+                        <setting>
+                            <label for="survey_apply_only_when_invoiced" string="Solo Cuando Esté Facturado"/>
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <field name="survey_apply_only_when_invoiced"/>
+                                    <span class="ml-2">Aplicar ajustes solo cuando invoice_status='invoiced'</span>
+                                </div>
+                                <div class="alert alert-info mt-2" role="alert">
+                                    <p class="mb-0">
+                                        <strong>Recomendado: Activar</strong><br/>
+                                        Mantiene consistencia con el sistema de comisiones existente.
+                                    </p>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    
+                </app>
+                
+            </xpath>
+            
+        </field>
+    </record>
+
+</odoo>

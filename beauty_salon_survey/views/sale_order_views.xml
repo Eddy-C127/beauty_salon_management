@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ========================================== -->
+    <!-- VISTA FORM SALE ORDER -->
+    <!-- ========================================== -->
+    
+    <record id="view_order_form_survey_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.survey.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="beauty_salon.view_order_form_inherit_sale_stock_beauty_salon"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar campos después de aux_branch_id -->
+            <xpath expr="//field[@name='aux_branch_id']" position="after">
+                
+                <!-- Grupo de encuesta (solo visible si hay encuesta) -->
+                <field name="survey_id" invisible="1"/>
+                <field name="survey_status" 
+                       invisible="not survey_id"
+                       widget="badge"/>
+                <field name="survey_score" 
+                       invisible="not survey_score"
+                       widget="progressbar"/>
+                
+            </xpath>
+            
+            <!-- Agregar notebook tab si existe notebook -->
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Encuesta de Satisfacción" 
+                      name="survey_info_tab"
+                      invisible="not survey_id">
+                    
+                    <group>
+                        <group string="📊 Resultado de Encuesta">
+                            <field name="survey_id" readonly="1" options="{'no_open': True}"/>
+                            <field name="survey_status" widget="badge"/>
+                            <field name="survey_score" widget="progressbar" 
+                                   invisible="not survey_score"/>
+                            <field name="survey_response_id" readonly="1"
+                                   invisible="not survey_response_id"
+                                   options="{'no_open': True}"/>
+                        </group>
+                        
+                        <group string="💰 Ajuste de Comisión" 
+                               invisible="not survey_commission_adjustment">
+                            <field name="survey_commission_adjustment" 
+                                   widget="monetary"/>
+                            <field name="survey_commission_adjustment_type"/>
+                            <div class="alert alert-info" colspan="2">
+                                <p class="mb-0">
+                                    <i class="fa fa-info-circle"/> 
+                                    Se aplicará cuando la orden esté totalmente facturada.
+                                </p>
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <group string="💬 Comentarios del Cliente" 
+                           invisible="not survey_comments">
+                        <field name="survey_comments" 
+                               nolabel="1" 
+                               readonly="1"
+                               widget="text"/>
+                    </group>
+                    
+                </page>
+            </xpath>
+            
+        </field>
+    </record>
+    
+    <!-- ========================================== -->
+    <!-- VISTA TREE QUOTATIONS -->
+    <!-- ========================================== -->
+    
+    <record id="view_quotation_tree_survey_inherit" model="ir.ui.view">
+        <field name="name">sale.order.tree.survey.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="beauty_salon.view_quotation_tree_inherit_beauty_salon"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar después de calendar_event_id que ya existe -->
+            <xpath expr="//field[@name='calendar_event_id']" position="after">
+                <field name="survey_status" optional="hide" widget="badge"/>
+                <field name="survey_score" optional="hide" widget="progressbar"/>
+                <field name="survey_commission_adjustment" 
+                       optional="hide" 
+                       widget="monetary"
+                       decoration-danger="survey_commission_adjustment &lt; 0"
+                       decoration-success="survey_commission_adjustment &gt; 0"/>
+            </xpath>
+            
+        </field>
+    </record>
+
+</odoo>

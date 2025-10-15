@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_calendar_event_survey_user,calendar.event.survey.user,calendar.model_calendar_event,group_beauty_survey_user,1,0,0,0
+access_calendar_event_survey_manager,calendar.event.survey.manager,calendar.model_calendar_event,group_beauty_survey_manager,1,1,1,1
+access_sale_order_survey_user,sale.order.survey.user,sale.model_sale_order,group_beauty_survey_user,1,0,0,0
+access_sale_order_survey_manager,sale.order.survey.manager,sale.model_sale_order,group_beauty_survey_manager,1,1,0,0
+access_survey_survey_user,survey.survey.user,survey.model_survey_survey,group_beauty_survey_user,1,0,0,0
+access_survey_survey_manager,survey.survey.manager,survey.model_survey_survey,group_beauty_survey_manager,1,1,1,1
+access_survey_user_input_user,survey.user_input.user,survey.model_survey_user_input,group_beauty_survey_user,1,0,0,0
+access_survey_user_input_manager,survey.user_input.manager,survey.model_survey_user_input,group_beauty_survey_manager,1,1,1,1
+access_pop_survey_config_user,pop.survey.config.user,model_pop_survey_config,group_beauty_survey_user,1,0,0,0
+access_pop_survey_config_manager,pop.survey.config.manager,model_pop_survey_config,group_beauty_survey_manager,1,1,1,0

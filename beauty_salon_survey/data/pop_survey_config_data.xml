@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    
+    <!-- ========================================== -->
+    <!-- CONFIGURACIÓN POR DEFECTO -->
+    <!-- Se crea automáticamente al instalar el módulo -->
+    <!-- ========================================== -->
+    
+    <record id="default_survey_config" model="pop.survey.config">
+        <field name="name">Configuración del Sistema de Encuestas</field>
+        <field name="active" eval="True"/>
+        
+        <!-- Umbrales por defecto -->
+        <field name="negative_threshold" eval="3.0"/>
+        <field name="positive_threshold" eval="4.0"/>
+        
+        <!-- Penalización por defecto: 10% -->
+        <field name="negative_commission_penalty" eval="10.0"/>
+        <field name="negative_penalty_type">percentage</field>
+        
+        <!-- Bonus desactivado por defecto -->
+        <field name="enable_positive_bonus" eval="False"/>
+        <field name="positive_commission_bonus" eval="0.0"/>
+        <field name="positive_bonus_type">percentage</field>
+        
+        <!-- Garantías: 7 días -->
+        <field name="warranty_deadline_days" eval="7"/>
+        <field name="auto_create_warranty" eval="True"/>
+        
+        <!-- Aplicar solo cuando esté facturado -->
+        <field name="apply_only_when_invoiced" eval="True"/>
+    </record>
+
+</odoo>

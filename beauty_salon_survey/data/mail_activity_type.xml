@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ========================================== -->
+    <!-- TIPOS DE ACTIVIDAD PERSONALIZADOS -->
+    <!-- ========================================== -->
+    
+    <!-- Tipo: Aprobar Garantía -->
+    <record id="mail_activity_type_warranty_approval" model="mail.activity.type">
+        <field name="name">Aprobar Garantía</field>
+        <field name="summary">Aprobar o rechazar garantía</field>
+        <field name="icon">fa-check-square-o</field>
+        <field name="decoration_type">warning</field>
+        <field name="delay_count">0</field>
+        <field name="delay_unit">days</field>
+    </record>
+    
+    <!-- Tipo: Escalación de Garantía -->
+    <record id="mail_activity_type_warranty_escalation" model="mail.activity.type">
+        <field name="name">🚨 Escalación de Garantía</field>
+        <field name="summary">Garantía negativa - Requiere atención urgente</field>
+        <field name="icon">fa-exclamation-triangle</field>
+        <field name="decoration_type">danger</field>
+        <field name="delay_count">0</field>
+        <field name="delay_unit">days</field>
+    </record>
+
+</odoo>
