@@ -21,7 +21,7 @@
     -->
     <menuitem id="menu_appointment_availability"
               name="Gestión de Disponibilidad"
-              parent="appointment.appointment_menu_config"
+              parent="appointment.menu_appointment_schedule_resources"
               action="action_open_availability_wizard"
               groups="appointment.group_appointment_manager"
               sequence="50"/>
