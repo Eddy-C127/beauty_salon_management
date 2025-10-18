@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- 
+        Acción de Ventana: Abrir Wizard de Gestión de Disponibilidad
+        
+        Esta acción abre el wizard directamente desde el menú.
+    -->
+    <record id="action_open_availability_wizard" model="ir.actions.act_window">
+        <field name="name">Gestión de Disponibilidad</field>
+        <field name="res_model">mass.availability.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{}</field>
+    </record>
+    
+    <!-- 
+        Menú: Gestión de Disponibilidad
+        
+        Aparece en: Citas > Configuración > Gestión de Disponibilidad
+    -->
+    <menuitem id="menu_appointment_availability"
+              name="Gestión de Disponibilidad"
+              parent="appointment.appointment_menu_config"
+              action="action_open_availability_wizard"
+              groups="appointment.group_appointment_manager"
+              sequence="50"/>
+
+</odoo>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Vista de Formulario del Wizard -->
+    <record id="view_mass_availability_wizard_form" model="ir.ui.view">
+        <field name="name">mass.availability.wizard.form</field>
+        <field name="model">mass.availability.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Gestión de Disponibilidad de Citas">
+                
+                <!-- Encabezado informativo -->
+                <div class="alert alert-info" role="alert" style="margin-bottom: 16px;">
+                    <strong>🗓️ Gestión de Disponibilidad de Citas</strong>
+                    <p class="mb-0">
+                        Este asistente permite cerrar o abrir la disponibilidad de citas 
+                        de forma masiva, controlando cuándo los clientes pueden agendar.
+                    </p>
+                </div>
+                
+                <sheet>
+                    <!-- Selección de Acción -->
+                    <group>
+                        <group string="Configuración">
+                            <field name="action_type" widget="radio"/>
+                            <field name="selection_mode" widget="radio"/>
+                        </group>
+                        
+                        <!-- Contador -->
+                        <group>
+                            <field name="appointment_count" 
+                                   string="Tipos de Cita Afectados" 
+                                   widget="statinfo"
+                                   class="oe_stat_button"/>
+                        </group>
+                    </group>
+                    
+                    <separator/>
+                    
+                    <!-- Campos MODO MASIVO -->
+                    <group string="Criterios de Selección Masiva" 
+                           invisible="selection_mode != 'mass'">
+                        <group>
+                            <field name="branch_id" 
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   required="selection_mode == 'mass'"
+                                   invisible="selection_mode != 'mass'"/>
+                            
+                            <field name="appointment_category"
+                                   required="selection_mode == 'mass'"
+                                   invisible="selection_mode != 'mass'"/>
+                        </group>
+                        
+                        <group>
+                            <div class="alert alert-warning" role="alert">
+                                <i class="fa fa-info-circle"/> 
+                                Se aplicará a todos los tipos de cita que coincidan con 
+                                la sucursal y categoría seleccionadas.
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <!-- Campo MODO INDIVIDUAL -->
+                    <group string="Selección Manual de Tipos de Cita"
+                           invisible="selection_mode != 'individual'">
+                        <field name="appointment_type_ids" 
+                               widget="many2many_tags"
+                               options="{'no_create': True}"
+                               placeholder="Seleccione los tipos de cita..."
+                               required="selection_mode == 'individual'"
+                               invisible="selection_mode != 'individual'"/>
+                    </group>
+                    
+                    <separator/>
+                    
+                    <!-- Campos para CERRAR DISPONIBILIDAD -->
+                    <group string="Configuración de Cierre" 
+                           invisible="action_type != 'close'">
+                        <group>
+                            <label for="date_from" string="Período de Cierre"/>
+                            <div class="o_row">
+                                <field name="date_from" 
+                                       widget="datetime" 
+                                       placeholder="Desde"
+                                       required="action_type == 'close'"
+                                       invisible="action_type != 'close'"/>
+                                <i class="fa fa-long-arrow-right mx-2" title="hasta"/>
+                                <field name="date_to" 
+                                       widget="datetime"
+                                       placeholder="Hasta"
+                                       required="action_type == 'close'"
+                                       invisible="action_type != 'close'"/>
+                            </div>
+                        </group>
+                        
+                        <group>
+                            <field name="close_reason" 
+                                   placeholder="Ej: Vacaciones, Mantenimiento, Capacitación..."
+                                   invisible="action_type != 'close'"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Nota informativa para CERRAR -->
+                    <group invisible="action_type != 'close'">
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fa fa-calendar-times-o"/> 
+                            <strong>Importante:</strong> Durante el período seleccionado, 
+                            los clientes NO podrán agendar citas en los tipos seleccionados.
+                        </div>
+                    </group>
+                    
+                    <!-- Campos para ABRIR DISPONIBILIDAD -->
+                    <group string="Configuración de Apertura" 
+                           invisible="action_type != 'open'">
+                        <group>
+                            <field name="open_availability_mode" 
+                                   widget="radio"
+                                   invisible="action_type != 'open'"/>
+                            
+                            <!-- Campo días en futuro (solo para recurring) -->
+                            <field name="open_slot_ids_days"
+                                   invisible="action_type != 'open' or open_availability_mode != 'recurring'"
+                                   required="action_type == 'open' and open_availability_mode == 'recurring'"/>
+                        </group>
+                        
+                        <!-- Campos de rango personalizado -->
+                        <group invisible="action_type != 'open' or open_availability_mode != 'custom_range'">
+                            <label for="open_date_from" string="Período de Disponibilidad"/>
+                            <div class="o_row">
+                                <field name="open_date_from" 
+                                       widget="datetime" 
+                                       placeholder="Desde"
+                                       required="action_type == 'open' and open_availability_mode == 'custom_range'"
+                                       invisible="action_type != 'open' or open_availability_mode != 'custom_range'"/>
+                                <i class="fa fa-long-arrow-right mx-2" title="hasta"/>
+                                <field name="open_date_to" 
+                                       widget="datetime"
+                                       placeholder="Hasta"
+                                       required="action_type == 'open' and open_availability_mode == 'custom_range'"
+                                       invisible="action_type != 'open' or open_availability_mode != 'custom_range'"/>
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <!-- Nota opcional para apertura -->
+                    <group invisible="action_type != 'open'">
+                        <group>
+                            <field name="open_reason" 
+                                   placeholder="Nota opcional sobre la apertura..."
+                                   invisible="action_type != 'open'"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Nota informativa para ABRIR -->
+                    <group invisible="action_type != 'open'">
+                        <div class="alert alert-success" role="alert">
+                            <i class="fa fa-calendar-check-o"/> 
+                            <strong>Importante:</strong> Los clientes podrán agendar citas 
+                            según la configuración de disponibilidad seleccionada.
+                        </div>
+                    </group>
+                    
+                </sheet>
+                
+                <!-- Botones de acción -->
+                <footer>
+                    <button name="action_apply_availability_change" 
+                            string="Aplicar Cambios" 
+                            type="object" 
+                            class="btn-primary"
+                            data-hotkey="q"/>
+                    <button string="Cancelar" 
+                            class="btn-secondary" 
+                            special="cancel"
+                            data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Acción del Wizard -->
+    <record id="action_mass_availability_wizard" model="ir.actions.act_window">
+        <field name="name">Gestión de Disponibilidad</field>
+        <field name="res_model">mass.availability.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="calendar.model_calendar_event"/>
+    </record>
+
+</odoo>

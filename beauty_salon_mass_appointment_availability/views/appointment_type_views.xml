@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- 
+        Herencia de Vista de Formulario de Appointment Type
+        Agrega campo de categoría y estado de disponibilidad
+    -->
+    <record id="appointment_type_view_form_inherit" model="ir.ui.view">
+        <field name="name">appointment.type.view.form.inherit</field>
+        <field name="model">appointment.type</field>
+        <field name="inherit_id" ref="appointment.appointment_type_view_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar campo de categoría después del nombre -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="appointment_category" 
+                       placeholder="Seleccione una categoría..."
+                       widget="selection"/>
+            </xpath>
+            
+            <!-- Agregar estado de disponibilidad en el header -->
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="%(action_mass_availability_wizard)d" 
+                            string="Gestión de Disponibilidad" 
+                            type="action"
+                            class="btn-primary"
+                            groups="appointment.group_appointment_manager"/>
+                </header>
+            </xpath>
+            
+            <!-- Agregar campo de estado visible después de la configuración de tiempo -->
+            <xpath expr="//field[@name='category_time_display']" position="after">
+                <field name="availability_status" 
+                       readonly="1"
+                       class="text-info"
+                       widget="text"/>
+            </xpath>
+            
+        </field>
+    </record>
+    
+    <!-- 
+        Herencia de Vista de Lista de Appointment Type
+        Agrega categoría y estado de disponibilidad
+    -->
+    <record id="appointment_type_view_tree_inherit" model="ir.ui.view">
+        <field name="name">appointment.type.view.tree.inherit</field>
+        <field name="model">appointment.type</field>
+        <field name="inherit_id" ref="appointment.appointment_type_view_tree"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar categoría y estado después del nombre -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="appointment_category" optional="show"/>
+                <field name="availability_status" optional="show"/>
+            </xpath>
+            
+        </field>
+    </record>
+    
+    <!-- 
+        Herencia de Vista de Búsqueda de Appointment Type
+        Agrega filtros y agrupaciones por categoría de servicio
+    -->
+    <record id="appointment_type_view_search_inherit" model="ir.ui.view">
+        <field name="name">appointment.type.view.search.inherit</field>
+        <field name="model">appointment.type</field>
+        <field name="inherit_id" ref="appointment.appointment_type_view_search"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar campo de búsqueda por categoría de servicio -->
+            <xpath expr="//field[@name='category']" position="after">
+                <field name="appointment_category"/>
+            </xpath>
+            
+            <!-- Agregar filtros por categoría de servicio ANTES del filtro "Archived" -->
+            <xpath expr="//filter[@name='filter_active']" position="before">
+                <separator/>
+                <filter string="Pestañas" 
+                        name="filter_pestanas" 
+                        domain="[('appointment_category', '=', 'pestanas')]"/>
+                <filter string="Cejas" 
+                        name="filter_cejas" 
+                        domain="[('appointment_category', '=', 'cejas')]"/>
+                <filter string="Tattoo Lips" 
+                        name="filter_tattoo_lips" 
+                        domain="[('appointment_category', '=', 'tattoo_lips')]"/>
+                <filter string="Tattoo Brows" 
+                        name="filter_tattoo_brows" 
+                        domain="[('appointment_category', '=', 'tattoo_brows')]"/>
+                <separator/>
+            </xpath>
+            
+            <!-- Agregar agrupación por categoría de servicio -->
+            <xpath expr="//filter[@name='group_by_category']" position="after">
+                <filter string="Categoría de Servicio" 
+                        name="group_by_appointment_category" 
+                        context="{'group_by': 'appointment_category'}"/>
+            </xpath>
+            
+        </field>
+    </record>
+
+</odoo>
