@@ -361,6 +361,7 @@ class MassAvailabilityWizard(models.TransientModel):
                     'category_time_display': 'punctual_fields',
                     'start_datetime': self.date_from,
                     'end_datetime': self.date_to,
+                    'is_manually_closed': True, 
                 })
                 
                 # Registrar en chatter
@@ -394,6 +395,7 @@ class MassAvailabilityWizard(models.TransientModel):
                         'category_time_display': 'recurring_fields',
                         'start_datetime': False,
                         'end_datetime': False,
+                        'is_manually_closed': False,
                     })
                 else:
                     # Disponibilidad en intervalo específico
@@ -401,6 +403,7 @@ class MassAvailabilityWizard(models.TransientModel):
                         'category_time_display': 'punctual_fields',
                         'start_datetime': self.open_date_from,
                         'end_datetime': self.open_date_to,
+                        'is_manually_closed': False,
                     })
                 
                 # Registrar en chatter

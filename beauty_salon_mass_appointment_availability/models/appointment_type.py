@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from datetime import datetime
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -21,7 +22,6 @@ class AppointmentType(models.Model):
     # CAMPOS
     # ============================================
     
-    # ✅ CAMBIO: Selection → Many2many
     appointment_category_ids = fields.Many2many(
         comodel_name='appointment.category',
         relation='appointment_type_category_rel',
@@ -38,35 +38,67 @@ class AppointmentType(models.Model):
         store=True,
         help='Muestra el estado actual de disponibilidad de este tipo de cita.'
     )
+    
+    # ✅ NUEVO: Campo para distinguir si fue cerrado manualmente
+    is_manually_closed = fields.Boolean(
+        string='Cerrado Manualmente',
+        default=False,
+        help='Indica si este tipo de cita fue cerrado manualmente mediante el wizard'
+    )
 
     # ============================================
     # CAMPOS COMPUTADOS
     # ============================================
     
-    @api.depends('category_time_display', 'start_datetime', 'end_datetime', 'slot_ids')
+    @api.depends('category_time_display', 'start_datetime', 'end_datetime', 'slot_ids', 'is_manually_closed')
     def _compute_availability_status(self):
         """
-        Calcula un mensaje legible del estado de disponibilidad.
+        ✅ MEJORADO: Calcula un mensaje legible e inteligente del estado de disponibilidad.
         
-        Muestra si la agenda está:
-        - Abierta (disponible ahora)
-        - Cerrada en un período específico
-        - Configurada con horarios recurrentes
+        Lógica:
+        1. Si category_time_display = 'recurring_fields' → Siempre disponible
+        2. Si category_time_display = 'punctual_fields':
+           a. Si is_manually_closed = True → CERRADA temporalmente
+           b. Si is_manually_closed = False → Disponible en período específico
+        3. Considera la fecha actual para mostrar mensajes contextuales
         """
+        now = fields.Datetime.now()
+        
         for appointment in self:
-            if appointment.category_time_display == 'punctual_fields':
-                # Agenda cerrada/limitada a un período
+            if appointment.category_time_display == 'recurring_fields':
+                # ✅ Disponibilidad recurrente normal
+                if appointment.slot_ids:
+                    slot_count = len(appointment.slot_ids)
+                    status = f"✅ Disponible - {slot_count} horario(s) configurado(s)"
+                else:
+                    status = "✅ Disponible - Sin horarios configurados"
+                    
+            elif appointment.category_time_display == 'punctual_fields':
+                # Modo de período específico
                 if appointment.start_datetime and appointment.end_datetime:
-                    status = f"🔒 CERRADA del {appointment.start_datetime.strftime('%d/%m/%Y %H:%M')} al {appointment.end_datetime.strftime('%d/%m/%Y %H:%M')}"
+                    start_str = appointment.start_datetime.strftime('%d/%m/%Y %H:%M')
+                    end_str = appointment.end_datetime.strftime('%d/%m/%Y %H:%M')
+                    
+                    if appointment.is_manually_closed:
+                        # ✅ Fue cerrado manualmente mediante el wizard
+                        if now < appointment.start_datetime:
+                            status = f"🔒 Cerrada - Próximamente del {start_str} al {end_str}"
+                        elif now > appointment.end_datetime:
+                            status = f"🔒 Cerrada - Período finalizado ({start_str} - {end_str})"
+                        else:
+                            status = f"🔒 Cerrada del {start_str} al {end_str}"
+                    else:
+                        # ✅ Es un período de disponibilidad limitada (no un cierre)
+                        if now < appointment.start_datetime:
+                            status = f"⏰ Próximamente disponible del {start_str} al {end_str}"
+                        elif now > appointment.end_datetime:
+                            status = f"⏱️ Disponibilidad finalizada ({start_str} - {end_str})"
+                        else:
+                            status = f"✅ Disponible del {start_str} al {end_str}"
                 else:
                     status = "⚠️ Configuración de período incompleta"
             else:
-                # Agenda abierta con disponibilidad recurrente
-                if appointment.slot_ids:
-                    slot_count = len(appointment.slot_ids)
-                    status = f"✅ ABIERTA - {slot_count} horario(s) configurado(s)"
-                else:
-                    status = "✅ ABIERTA - Disponibilidad ilimitada"
+                status = "⚠️ Estado desconocido"
             
             appointment.availability_status = status
 

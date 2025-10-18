@@ -27,29 +27,33 @@
                 </header>
             </xpath>
             
-            <!-- Agregar campo de estado visible después de la configuración de tiempo -->
+            <!-- Campo invisible en formulario -->
             <xpath expr="//field[@name='category_time_display']" position="after">
                 <field name="availability_status" 
-                       readonly="1"
-                       class="text-info"
-                       widget="text"/>
+                       invisible="1"/>
+                <field name="is_manually_closed" invisible="1"/>
             </xpath>
             
         </field>
     </record>
     
     <!-- Herencia de Vista de Lista de Appointment Type -->
-    <!-- NOTA: Heredamos de la vista existente, manteniendo su tipo original -->
     <record id="appointment_type_view_tree_inherit" model="ir.ui.view">
         <field name="name">appointment.type.view.tree.inherit</field>
         <field name="model">appointment.type</field>
         <field name="inherit_id" ref="appointment.appointment_type_view_tree"/>
         <field name="arch" type="xml">
             
-            <!-- Agregar categorías y estado después del nombre -->
+            <!-- ✅ CORREGIDO: Sin branch_id -->
             <xpath expr="//field[@name='name']" position="after">
-                <field name="appointment_category_ids" widget="many2many_tags" optional="show"/>
-                <field name="availability_status" optional="show"/>
+                <field name="appointment_category_ids" 
+                       widget="many2many_tags" 
+                       optional="show"/>
+                <field name="availability_status" 
+                       optional="show"
+                       decoration-success="availability_status and '✅' in availability_status"
+                       decoration-danger="availability_status and '🔒' in availability_status"
+                       decoration-warning="availability_status and '⏰' in availability_status or availability_status and '⏱️' in availability_status"/>
             </xpath>
             
         </field>
@@ -67,8 +71,18 @@
                 <field name="appointment_category_ids"/>
             </xpath>
             
-            <!-- Filtros dinámicos basados en categorías existentes -->
+            <!-- Filtros por estado de disponibilidad -->
             <xpath expr="//filter[@name='filter_active']" position="before">
+                <separator/>
+                <filter string="✅ Disponibles" 
+                        name="filter_available" 
+                        domain="[('availability_status', 'ilike', '✅')]"/>
+                <filter string="🔒 Cerradas" 
+                        name="filter_closed" 
+                        domain="[('availability_status', 'ilike', '🔒')]"/>
+                <filter string="⏰ Próximamente" 
+                        name="filter_upcoming" 
+                        domain="['|', ('availability_status', 'ilike', '⏰'), ('availability_status', 'ilike', '⏱️')]"/>
                 <separator/>
                 <filter string="Pestañas" 
                         name="filter_pestanas" 
@@ -85,7 +99,7 @@
                 <separator/>
             </xpath>
             
-            <!-- Agregar agrupación por categorías -->
+            <!-- Agregar agrupaciones -->
             <xpath expr="//filter[@name='group_by_category']" position="after">
                 <filter string="Categorías de Servicio" 
                         name="group_by_appointment_categories" 
