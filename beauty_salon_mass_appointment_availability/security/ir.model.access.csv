@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_mass_availability_wizard_manager,mass.availability.wizard manager,model_mass_availability_wizard,appointment.group_appointment_manager,1,1,1,1
 access_mass_availability_wizard_user,mass.availability.wizard user,model_mass_availability_wizard,base.group_user,1,0,0,0
+access_appointment_category_manager,appointment.category manager,model_appointment_category,appointment.group_appointment_manager,1,1,1,1
+access_appointment_category_user,appointment.category user,model_appointment_category,base.group_user,1,0,0,0

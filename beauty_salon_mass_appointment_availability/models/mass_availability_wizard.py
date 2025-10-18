@@ -46,21 +46,20 @@ class MassAvailabilityWizard(models.TransientModel):
     )
     
     # Campos para modo MASIVO
-    branch_id = fields.Many2one(
+    branch_ids = fields.Many2many(
         comodel_name='stock.warehouse',
-        string='Sucursal',
-        help='Sucursal para filtrar tipos de cita'
+        string='Sucursales',
+        help='Sucursales para filtrar tipos de cita. Si se deja vacío se aplica a TODAS las sucursales.'
     )
     
-    appointment_category = fields.Selection(
-        selection=[
-            ('pestanas', 'Pestañas'),
-            ('cejas', 'Cejas'),
-            ('tattoo_lips', 'Tattoo Lips'),
-            ('tattoo_brows', 'Tattoo Brows'),
-        ],
-        string='Categoría de Servicio',
-        help='Categoría de servicio para filtrar tipos de cita'
+    # ✅ CAMBIO: Selection → Many2many
+    appointment_category_ids = fields.Many2many(
+        comodel_name='appointment.category',
+        relation='wizard_appointment_category_rel',
+        column1='wizard_id',
+        column2='category_id',
+        string='Categorías de Servicio',
+        help='Categorías de servicio para filtrar tipos de cita. Si se deja vacío se aplica a TODAS las categorías.'
     )
     
     # Campo para modo INDIVIDUAL
@@ -130,7 +129,7 @@ class MassAvailabilityWizard(models.TransientModel):
     # CAMPOS COMPUTADOS
     # ============================================
     
-    @api.depends('selection_mode', 'branch_id', 'appointment_category', 'appointment_type_ids')
+    @api.depends('selection_mode', 'branch_ids', 'appointment_category_ids', 'appointment_type_ids')
     def _compute_appointment_count(self):
         """Calcula el número de appointment types que serán afectados."""
         for wizard in self:
@@ -187,19 +186,13 @@ class MassAvailabilityWizard(models.TransientModel):
                         _('La fecha de inicio debe ser anterior a la fecha de fin.')
                     )
 
-    @api.constrains('selection_mode', 'branch_id', 'appointment_category')
+    @api.constrains('selection_mode', 'appointment_category_ids')
     def _check_mass_mode_fields(self):
         """Valida campos en modo masivo."""
         for wizard in self:
-            if wizard.selection_mode == 'mass':
-                if not wizard.branch_id:
-                    raise ValidationError(
-                        _('Debe seleccionar una sucursal en modo masivo.')
-                    )
-                if not wizard.appointment_category:
-                    raise ValidationError(
-                        _('Debe seleccionar una categoría de servicio en modo masivo.')
-                    )
+            # ✅ CAMBIO: Ahora las categorías también son opcionales (vacío = TODAS)
+            # Solo validamos que esté en modo masivo
+            pass  # Sin validaciones requeridas, todo es opcional
 
     @api.constrains('selection_mode', 'appointment_type_ids')
     def _check_individual_mode_fields(self):
@@ -216,23 +209,31 @@ class MassAvailabilityWizard(models.TransientModel):
     
     def _get_appointment_types_for_mass_mode(self):
         """
-        Obtiene appointment types basándose en sucursal y categoría.
+        Obtiene appointment types basándose en sucursales y categorías.
         
         Returns:
             recordset: Appointment types que cumplen los criterios
         """
         self.ensure_one()
         
-        domain = [
-            ('branch_id', '=', self.branch_id.id),
-            ('appointment_category', '=', self.appointment_category),
-        ]
+        domain = []
+        
+        # ✅ Si hay sucursales seleccionadas, filtrar por ellas
+        if self.branch_ids:
+            domain.append(('branch_id', 'in', self.branch_ids.ids))
+        
+        # ✅ Si hay categorías seleccionadas, filtrar por ellas
+        if self.appointment_category_ids:
+            domain.append(('appointment_category_ids', 'in', self.appointment_category_ids.ids))
         
         appointment_types = self.env['appointment.type'].search(domain)
         
+        branch_info = ', '.join(self.branch_ids.mapped('name')) if self.branch_ids else 'TODAS las sucursales'
+        category_info = ', '.join(self.appointment_category_ids.mapped('name')) if self.appointment_category_ids else 'TODAS las categorías'
+        
         _logger.info(
             f'Encontrados {len(appointment_types)} tipos de cita para '
-            f'sucursal {self.branch_id.name} y categoría {self.appointment_category}'
+            f'{branch_info} y {category_info}'
         )
         
         return appointment_types
@@ -298,6 +299,21 @@ class MassAvailabilityWizard(models.TransientModel):
             '✓ Tipos de cita actualizados: %s\n'
         ) % (icon, action_msg, len(appointment_types))
         
+        # Agregar información de sucursales
+        if self.selection_mode == 'mass':
+            if self.branch_ids:
+                branch_names = ', '.join(self.branch_ids.mapped('name'))
+                message += _('\n🏢 Sucursales: %s') % branch_names
+            else:
+                message += _('\n🏢 Sucursales: TODAS')
+            
+            # ✅ Agregar información de categorías
+            if self.appointment_category_ids:
+                category_names = ', '.join(self.appointment_category_ids.mapped('name'))
+                message += _('\n📁 Categorías: %s') % category_names
+            else:
+                message += _('\n📁 Categorías: TODAS')
+        
         # Agregar detalles según acción
         if self.action_type == 'close':
             message += _('\n📅 Período cerrado: %s - %s') % (
@@ -319,7 +335,7 @@ class MassAvailabilityWizard(models.TransientModel):
         
         # Listar tipos afectados
         message += _('\n\n📋 Tipos de cita afectados:')
-        for apt in appointment_types[:10]:  # Mostrar máximo 10
+        for apt in appointment_types[:10]:
             message += f'\n  • {apt.name}'
         
         if len(appointment_types) > 10:

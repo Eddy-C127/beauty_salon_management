@@ -51,7 +51,11 @@
         # Seguridad
         'security/ir.model.access.csv',
         
+        # Datos
+        'data/appointment_category_data.xml',  # ✅ NUEVO
+        
         # Vistas
+        'views/appointment_category_views.xml',  # ✅ NUEVO
         'views/mass_availability_wizard_view.xml',
         'views/appointment_type_views.xml',
         'views/calendar_event_views.xml',

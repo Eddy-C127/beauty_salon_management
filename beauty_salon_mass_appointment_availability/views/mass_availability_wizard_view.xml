@@ -40,14 +40,17 @@
                     <group string="Criterios de Selección Masiva" 
                            invisible="selection_mode != 'mass'">
                         <group>
-                            <field name="branch_id" 
-                                   options="{'no_create': True, 'no_create_edit': True}"
-                                   required="selection_mode == 'mass'"
-                                   invisible="selection_mode != 'mass'"/>
+                            <field name="branch_ids" 
+                                    widget="many2many_tags"
+                                    options="{'no_create': True, 'no_create_edit': True}"
+                                    placeholder="Si se deja vacío se aplica a TODAS las sucursales"
+                                    invisible="selection_mode != 'mass'"/>
                             
-                            <field name="appointment_category"
-                                   required="selection_mode == 'mass'"
-                                   invisible="selection_mode != 'mass'"/>
+                            <field name="appointment_category_ids"
+                                    widget="many2many_tags"
+                                    options="{'color_field': 'color'}"
+                                    placeholder="Si se deja vacío se aplica a TODAS las categorías"
+                                    invisible="selection_mode != 'mass'"/>
                         </group>
                         
                         <group>

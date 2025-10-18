@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Vista de Formulario -->
+    <record id="appointment_category_view_form" model="ir.ui.view">
+        <field name="name">appointment.category.view.form</field>
+        <field name="model">appointment.category</field>
+        <field name="arch" type="xml">
+            <form string="Categoría de Servicio">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="name" placeholder="Ej: Pestañas, Cejas..."/>
+                            <field name="code" placeholder="Ej: pestanas, cejas..."/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="color" widget="color_picker"/>
+                            <field name="appointment_type_count"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <field name="description" placeholder="Descripción de la categoría..."/>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Tipos de Cita" name="appointment_types">
+                            <field name="appointment_type_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Vista de Lista -->
+    <record id="appointment_category_view_list" model="ir.ui.view">
+        <field name="name">appointment.category.view.list</field>
+        <field name="model">appointment.category</field>
+        <field name="arch" type="xml">
+            <list string="Categorías de Servicio">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="appointment_type_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Vista de Búsqueda -->
+    <record id="appointment_category_view_search" model="ir.ui.view">
+        <field name="name">appointment.category.view.search</field>
+        <field name="model">appointment.category</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Categorías">
+                <field name="name"/>
+                <field name="code"/>
+                <separator/>
+                <filter string="Activas" name="filter_active" domain="[('active', '=', True)]"/>
+                <filter string="Archivadas" name="filter_inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Acción de Ventana -->
+    <record id="appointment_category_action" model="ir.actions.act_window">
+        <field name="name">Categorías de Servicio</field>
+        <field name="res_model">appointment.category</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crear nueva categoría de servicio
+            </p>
+            <p>
+                Las categorías permiten clasificar los tipos de cita por servicio.
+            </p>
+        </field>
+    </record>
+    
+    <!-- 
+    ✅ MENUITEM DESHABILITADO - El parent no existe en esta versión de Odoo
+    
+    Puedes acceder a las categorías desde:
+    1. Settings > Technical > Database Structure > Models > appointment.category
+    2. O directamente desde el widget many2many_tags en appointment.type
+    3. Si necesitas un menú, primero identifica el parent correcto con modo desarrollador
+    -->
+    <!--
+    <menuitem id="menu_appointment_category"
+              name="Categorías de Servicio"
+              parent="appointment.appointment_menu_configuration"
+              action="appointment_category_action"
+              sequence="45"/>
+    -->
+
+</odoo>

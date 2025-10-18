@@ -11,7 +11,7 @@ class AppointmentType(models.Model):
     Extensión del modelo appointment.type para gestión de disponibilidad.
     
     Agrega:
-    - Campo de categoría de servicio
+    - Campo de categorías de servicio (Many2many)
     - Campo de estado de disponibilidad (visible para usuarios)
     - Métodos para registro en chatter
     """
@@ -21,16 +21,15 @@ class AppointmentType(models.Model):
     # CAMPOS
     # ============================================
     
-    appointment_category = fields.Selection(
-        selection=[
-            ('pestanas', 'Pestañas'),
-            ('cejas', 'Cejas'),
-            ('tattoo_lips', 'Tattoo Lips'),
-            ('tattoo_brows', 'Tattoo Brows'),
-        ],
-        string='Categoría de Cita',
-        help='Categoría del servicio de cita. Utilizado para filtros y gestión masiva.',
-        tracking=True,  # Seguimiento en chatter
+    # ✅ CAMBIO: Selection → Many2many
+    appointment_category_ids = fields.Many2many(
+        comodel_name='appointment.category',
+        relation='appointment_type_category_rel',
+        column1='appointment_type_id',
+        column2='category_id',
+        string='Categorías de Servicio',
+        help='Categorías de servicio asociadas a este tipo de cita',
+        tracking=True,
     )
     
     availability_status = fields.Text(
@@ -124,14 +123,14 @@ class AppointmentType(models.Model):
     @api.model
     def _name_search(self, name='', args=None, operator='ilike', limit=100, order=None):
         """
-        Mejora búsqueda para incluir categoría en los resultados.
+        Mejora búsqueda para incluir categorías en los resultados.
         """
         args = args or []
         
         if name:
             domain = ['|', 
                       ('name', operator, name),
-                      ('appointment_category', operator, name)]
+                      ('appointment_category_ids.name', operator, name)]
             
             if args:
                 domain = ['&'] + domain + args
