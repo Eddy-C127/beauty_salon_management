@@ -149,7 +149,7 @@
             <!-- Agregar después de sale_order_id que ya existe -->
             <xpath expr="//field[@name='sale_order_id']" position="after">
                 <field name="survey_status" optional="show" widget="badge"/>
-                <field name="survey_score" optional="hide" widget="progressbar"/>
+                <field name="survey_score_display" optional="show"/>
                 <field name="warranty_status" optional="hide"/>
                 <field name="is_warranty" optional="hide"/>
             </xpath>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Beauty Salon - Survey & Warranty System',
-    'version': '18.0.1.0.4',
+    'version': '18.0.1.0.6',
     'category': 'Services/Survey',
     'summary': 'Sistema integral de encuestas, garantías y ajuste de comisiones para Pop Studio',
     'description': """

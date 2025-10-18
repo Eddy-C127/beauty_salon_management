@@ -237,6 +237,37 @@ class CalendarEvent(models.Model):
                 record.survey_url = False
 
     # ============================================
+    # OVERRIDE CREATE (ITERACIÓN 4 - Garantías)
+    # ============================================
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Override create para manejar vinculación de garantías."""
+        records = super(CalendarEvent, self).create(vals_list)
+        
+        for record in records:
+            # Forzar nombre de garantía si es necesario
+            if record.is_warranty and record.appointment_type_id:
+                customer = record.manual_customer_id or record.partner_id
+                customer_name = customer.name if customer else 'Cliente'
+                service_name = record.appointment_type_id.name
+                warranty_name = f'Garantía - {customer_name} - {service_name}'
+                if record.name != warranty_name:
+                    record.name = warranty_name
+                    _logger.info(f'Nombre de garantía establecido: {warranty_name}')
+            
+            # Vincular con cita original
+            if record.is_warranty and record.original_appointment_id:
+                if not record.original_appointment_id.warranty_appointment_id:
+                    record.original_appointment_id.warranty_appointment_id = record.id
+                    record.original_appointment_id.warranty_status = 'completed'
+                    _logger.info(
+                        f'Cita de garantía {record.id} vinculada a cita original {record.original_appointment_id.id}'
+                    )
+        
+        return records
+    
+    # ============================================
     # MÉTODOS AUXILIARES
     # ============================================
     
@@ -264,9 +295,19 @@ class CalendarEvent(models.Model):
         phone = customer.mobile or customer.phone or ''
         return ''.join(filter(str.isdigit, phone))
 
+    @api.onchange('real_employee_id', 'appointment_type_id')
+    def _onchange_preserve_warranty_name(self):
+        """
+        Previene que se cambie el nombre de garantías al cambiar empleado/tipo.
+        """
+        if self.is_warranty and self.appointment_type_id:
+            service_name = self.appointment_type_id.name
+            self.name = f'Garantía - {service_name}'
+
     # ============================================
     # MÉTODOS DE LÓGICA DE NEGOCIO
     # ============================================
+    
     
     def write(self, vals):
         """
@@ -503,20 +544,23 @@ class CalendarEvent(models.Model):
         service_name = self.appointment_type_id.name if self.appointment_type_id else 'Servicio'
         
         summary = f'Aprobar Garantía: {customer_name} - {service_name}'
-        note = f'''
-        <p><strong>Encuesta Negativa Recibida</strong></p>
-        <ul>
-            <li><strong>Cliente:</strong> {customer_name}</li>
-            <li><strong>Servicio:</strong> {service_name}</li>
-            <li><strong>Calificación:</strong> {self.survey_score:.1f}/5.0</li>
-            <li><strong>Fecha del servicio:</strong> {self.start.strftime('%d/%m/%Y') if self.start else 'N/A'}</li>
-        </ul>
-        <p><strong>Comentarios del cliente:</strong></p>
-        <p>{self.survey_comments or 'Sin comentarios'}</p>
-        <hr/>
-        <p>Por favor, revisa la encuesta y decide si se aprueba la garantía.</p>
-        '''
         
+        # HTML con formato de lista (como el que funciona al aprobar)
+        note = f'''🚨 Encuesta Negativa Recibida
+
+<ul>
+<li><strong>Cliente:</strong> {customer_name}</li>
+<li><strong>Servicio:</strong> {service_name}</li>
+<li><strong>Calificación:</strong> {self.survey_score:.1f}/5.0</li>
+<li><strong>Fecha del servicio:</strong> {self.start.strftime('%d/%m/%Y') if self.start else 'N/A'}</li>
+</ul>
+
+<p><strong>Comentarios del cliente:</strong></p>
+<p>{self.survey_comments or 'Sin comentarios'}</p>
+
+<p>⚠️ Por favor, revisa la encuesta y decide si se aprueba la garantía.</p>'''
+        
+        # Crear actividad (el note se publicará automáticamente al aprobar/rechazar)
         activity = self.env['mail.activity'].create({
             'activity_type_id': activity_type.id if activity_type else False,
             'summary': summary,
@@ -527,16 +571,9 @@ class CalendarEvent(models.Model):
             'date_deadline': fields.Date.today(),
         })
         
-        # Enviar mensaje al chatter INMEDIATAMENTE
-        self.message_post(
-            body=note,
-            subject=summary,
-            message_type='notification',
-            subtype_xmlid='mail.mt_note',
-        )
-        
         _logger.info(
-            f'Actividad de aprobación creada (ID: {activity.id}) para usuario {config.warranty_approval_user_id.name}'
+            f'Actividad de aprobación creada (ID: {activity.id}) para usuario {config.warranty_approval_user_id.name}. '
+            f'El mensaje se publicará en el chatter al aprobar/rechazar.'
         )
     
     def action_approve_warranty(self):
@@ -593,7 +630,8 @@ class CalendarEvent(models.Model):
     
     def action_create_warranty_appointment(self):
         """
-        Crea una nueva cita marcada como garantía EN MODO BORRADOR.
+        Abre formulario para crear cita de garantía EN MODO BORRADOR.
+        No crea el registro hasta que el usuario guarde.
         """
         self.ensure_one()
         
@@ -605,38 +643,34 @@ class CalendarEvent(models.Model):
         
         config = self.env['pop.survey.config'].get_config()
         
-        warranty_vals = {
-            'name': f'Garantía - {self.appointment_type_id.name if self.appointment_type_id else "Servicio"}',
-            'manual_customer_id': self.manual_customer_id.id if self.manual_customer_id else False,
-            'partner_id': self.partner_id.id if self.partner_id else False,
-            'appointment_type_id': self.appointment_type_id.id if self.appointment_type_id else False,
-            'real_employee_id': self.real_employee_id.id if self.real_employee_id else False,
-            'is_warranty': True,
-            'original_appointment_id': self.id,
-            'survey_id': config.default_warranty_survey_id.id if config.default_warranty_survey_id else False,
-            'warranty_status': 'not_required',
+        # Preparar valores DEFAULT (no crear registro aún)
+        default_vals = {
+            'default_name': f'Garantía - {self.appointment_type_id.name if self.appointment_type_id else "Servicio"}',
+            'default_manual_customer_id': self.manual_customer_id.id if self.manual_customer_id else False,
+            'default_partner_id': self.partner_id.id if self.partner_id else False,
+            'default_appointment_type_id': self.appointment_type_id.id if self.appointment_type_id else False,
+            'default_real_employee_id': self.real_employee_id.id if self.real_employee_id else False,
+            'default_is_warranty': True,
+            'default_original_appointment_id': self.id,
+            'default_survey_id': config.default_warranty_survey_id.id if config.default_warranty_survey_id else False,
+            'default_warranty_status': 'not_required',
         }
         
-        new_appointment = self.env['calendar.event'].create(warranty_vals)
+        _logger.info(f'Abriendo formulario de garantía para cita original {self.id}')
         
-        self.warranty_appointment_id = new_appointment.id
-        
-        _logger.info(
-            f'Cita de garantía creada (ID: {new_appointment.id}) en modo borrador para cita original {self.id}'
-        )
-        
+        # Abrir formulario en modo creación (SIN guardar)
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Cita de Garantía - Completar Detalles',
+            'name': 'Nueva Cita de Garantía',
             'res_model': 'calendar.event',
-            'res_id': new_appointment.id,
             'view_mode': 'form',
             'target': 'current',
-            'context': {
-                'form_view_initial_mode': 'edit',
-            }
+            'context': default_vals,
+            'views': [(False, 'form')],
         }
-    
+        
+        
+          
     def _handle_negative_warranty_survey(self):
         """
         Escala cuando una GARANTÍA también sale negativa.
