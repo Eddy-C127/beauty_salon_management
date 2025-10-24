@@ -312,26 +312,50 @@ class CalendarEvent(models.Model):
     def write(self, vals):
         """
         Override write para detectar cambios de estado.
+        OPTIMIZADO: Evita recursión procesando triggers DESPUÉS del super().write()
         """
-        res = super(CalendarEvent, self).write(vals)
+        if 'appointment_status' in vals and vals['appointment_status'] == 'concluded':
+            warranty_records = self.filtered('is_warranty')
+            if warranty_records:
+                raise UserError(_(
+                    'No puedes marcar una cita de garantía como "Concluido".\n\n'
+                    '✅ Para concluir una garantía, usa el estado: "Warranty Completed"'
+                ))
+                
+        # 1. Identificar registros que necesitarán trigger de encuesta
+        trigger_survey_records = self.env['calendar.event']
+        trigger_warranty_records = self.env['calendar.event']
         
         if 'appointment_status' in vals:
             status = vals['appointment_status']
+            
             if status == 'concluded':
-                for record in self.filtered(lambda r: not r.is_warranty):
-                    record._trigger_survey_flow()
+                trigger_survey_records = self.filtered(lambda r: not r.is_warranty)
             elif status == 'warranty_completed':
-                for record in self.filtered('is_warranty'):
-                    record._trigger_warranty_survey_flow()
-            elif status == 'booked' and self.is_warranty and self.original_appointment_id:
-                # Cuando se guarda una garantía que estaba en borrador
-                self.original_appointment_id.warranty_status = 'completed'
+                trigger_warranty_records = self.filtered('is_warranty')
+            elif status == 'booked':
+                # Actualizar warranty_status cuando se guarda una garantía
+                for record in self.filtered(lambda r: r.is_warranty and r.original_appointment_id):
+                    if record.original_appointment_id.warranty_status != 'completed':
+                        # Este write es seguro porque no afecta appointment_status
+                        record.original_appointment_id.warranty_status = 'completed'
+        
+        # 2. Ejecutar el write UNA SOLA VEZ
+        res = super(CalendarEvent, self).write(vals)
+        
+        # 3. DESPUÉS del write, disparar los triggers de encuesta
+        for record in trigger_survey_records:
+            record._trigger_survey_flow()
+        
+        for record in trigger_warranty_records:
+            record._trigger_warranty_survey_flow()
         
         return res
     
     def _trigger_survey_flow(self):
         """
         Dispara el flujo de encuesta para una cita normal.
+        OPTIMIZADO: Usa SQL directo para evitar recursión.
         """
         self.ensure_one()
         
@@ -367,19 +391,32 @@ class CalendarEvent(models.Model):
         
         user_input = self.env['survey.user_input'].create(user_input_vals)
         
-        self.write({
-            'survey_response_id': user_input.id,
-            'survey_token': user_input.access_token,
-            'survey_status': 'sent',
-            'survey_sent_date': fields.Datetime.now(),
-        })
+        # ✅ CAMBIO CLAVE: Actualizar usando SQL directo para evitar recursión
+        self.env.cr.execute("""
+            UPDATE calendar_event 
+            SET survey_response_id = %s,
+                survey_token = %s,
+                survey_status = %s,
+                survey_sent_date = %s
+            WHERE id = %s
+        """, (
+            user_input.id,
+            user_input.access_token,
+            'sent',
+            fields.Datetime.now(),
+            self.id
+        ))
+        
+        # Invalidar caché para que los campos se actualicen en el recordset
+        self.invalidate_recordset(['survey_response_id', 'survey_token', 'survey_status', 'survey_sent_date'])
         
         survey_url = user_input.get_start_url()
-        _logger.info(f'Encuesta enviada para cita {self.id} - Cliente: {customer.name} - URL: {survey_url}')
+        _logger.info(f'✅ Encuesta enviada para cita {self.id} - Cliente: {customer.name} - URL: {survey_url}')
 
     def _trigger_warranty_survey_flow(self):
         """
         Dispara el flujo de encuesta para una garantía.
+        OPTIMIZADO: Usa SQL directo para evitar recursión.
         """
         self.ensure_one()
         
@@ -415,15 +452,26 @@ class CalendarEvent(models.Model):
         
         user_input = self.env['survey.user_input'].create(user_input_vals)
         
-        self.write({
-            'survey_response_id': user_input.id,
-            'survey_token': user_input.access_token,
-            'survey_status': 'sent',
-            'survey_sent_date': fields.Datetime.now(),
-        })
+        # ✅ CAMBIO CLAVE: SQL directo + invalidate cache
+        self.env.cr.execute("""
+            UPDATE calendar_event 
+            SET survey_response_id = %s,
+                survey_token = %s,
+                survey_status = %s,
+                survey_sent_date = %s
+            WHERE id = %s
+        """, (
+            user_input.id,
+            user_input.access_token,
+            'sent',
+            fields.Datetime.now(),
+            self.id
+        ))
+        
+        self.invalidate_recordset(['survey_response_id', 'survey_token', 'survey_status', 'survey_sent_date'])
         
         survey_url = user_input.get_start_url()
-        _logger.info(f'Encuesta de garantía enviada para cita {self.id} - URL: {survey_url}')
+        _logger.info(f'✅ Encuesta de garantía enviada para cita {self.id} - URL: {survey_url}')
     
     def _process_survey_response(self):
         """
@@ -431,15 +479,36 @@ class CalendarEvent(models.Model):
         """
         self.ensure_one()
         
+        # ✅ VALIDACIÓN 1: Verificar que existe survey_response_id
         if not self.survey_response_id:
+            _logger.warning(f'⚠️ Cita {self.id} no tiene survey_response_id. Abortando procesamiento.')
             return
         
+        # ✅ VALIDACIÓN 2: Verificar que la encuesta está completada
+        if self.survey_response_id.state != 'done':
+            _logger.warning(
+                f'⚠️ Encuesta de cita {self.id} aún no está completada. '
+                f'Estado actual: {self.survey_response_id.state}. '
+                f'Se requiere estado "done" para procesar.'
+            )
+            return  # ← CRÍTICO: Este return debe estar alineado con el if
+        
+        # ✅ VALIDACIÓN 3: Prevenir procesamiento duplicado
+        if self.survey_status in ['positive', 'negative']:
+            _logger.info(
+                f'ℹ️ Encuesta de cita {self.id} ya fue procesada. '
+                f'Estado actual: {self.survey_status}. Saltando.'
+            )
+            return
+        
+        # Calcular calificación
         score = self._calculate_survey_score()
         
         if score is None:
             _logger.warning(f'No se pudo calcular la calificación para la cita {self.id}.')
             return
         
+        # Clasificar encuesta
         config = self.env['pop.survey.config'].get_config()
         
         if config.is_negative_survey(score):
@@ -734,8 +803,10 @@ class CalendarEvent(models.Model):
     def _check_warranty_deadlines(self):
         """
         Cron job que revisa garantías aprobadas con deadline vencido.
+        Se ejecuta diariamente a las 00:00.
         """
         today = fields.Date.today()
+        _logger.info(f'🔵 CRON WARRANTY DEADLINES - Iniciando revisión para fecha: {today.strftime("%d/%m/%Y")}')
         
         expired_warranties = self.search([
             ('warranty_status', '=', 'approved'),
@@ -744,15 +815,21 @@ class CalendarEvent(models.Model):
         ])
         
         if not expired_warranties:
-            _logger.info('No hay garantías vencidas.')
+            _logger.info('✅ No hay garantías vencidas.')
             return
         
-        _logger.warning(f'Se encontraron {len(expired_warranties)} garantías vencidas.')
+        _logger.warning(f'⚠️ Se encontraron {len(expired_warranties)} garantías vencidas.')
         
         config = self.env['pop.survey.config'].get_config()
         
+        if not config.warranty_approval_user_id:
+            _logger.error('❌ No hay usuario configurado para aprobación de garantías. No se pueden enviar notificaciones.')
+            return
+        
+        notifications_sent = 0
+        
         for appointment in expired_warranties:
-            if config.warranty_approval_user_id:
+            try:
                 customer_name = appointment._get_customer_name()
                 
                 note = f'''
@@ -776,5 +853,11 @@ class CalendarEvent(models.Model):
                     'user_id': config.warranty_approval_user_id.id,
                     'date_deadline': today,
                 })
+                
+                notifications_sent += 1
+                _logger.info(f'✅ Notificación enviada para cita {appointment.id} - {customer_name}')
+                
+            except Exception as e:
+                _logger.error(f'❌ Error al procesar garantía vencida {appointment.id}: {str(e)}')
         
-        _logger.info(f'Notificaciones enviadas para {len(expired_warranties)} garantías vencidas.')            
+        _logger.info(f'✅ CRON COMPLETADO - {notifications_sent}/{len(expired_warranties)} notificaciones enviadas.')          

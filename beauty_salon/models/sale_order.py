@@ -74,5 +74,10 @@ class SaleOrderLine(models.Model):
                 
                 if vals_to_write:
                     line.order_id.write(vals_to_write)
-        
+                    
+                # 🎯 Vincular SO al calendar.event (citas website)
+                # Usar relación directa line.calendar_event_id
+                if line.calendar_event_id and not line.calendar_event_id.sale_order_id:
+                    line.calendar_event_id.write({'sale_order_id': line.order_id.id})
+
         return lines

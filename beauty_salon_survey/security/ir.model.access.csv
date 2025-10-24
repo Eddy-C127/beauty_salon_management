@@ -9,3 +9,4 @@ access_survey_user_input_user,survey.user_input.user,survey.model_survey_user_in
 access_survey_user_input_manager,survey.user_input.manager,survey.model_survey_user_input,group_beauty_survey_manager,1,1,1,1
 access_pop_survey_config_user,pop.survey.config.user,model_pop_survey_config,group_beauty_survey_user,1,0,0,0
 access_pop_survey_config_manager,pop.survey.config.manager,model_pop_survey_config,group_beauty_survey_manager,1,1,1,0
+access_pop_survey_config_admin,pop.survey.config.admin,model_pop_survey_config,base.group_system,1,1,1,0

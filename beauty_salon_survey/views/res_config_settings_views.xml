@@ -14,7 +14,7 @@
             <!-- Agregar nuestra app en Settings -->
             <xpath expr="//form" position="inside">
                 
-                <app string="Beauty Salon Survey" name="beauty_salon_survey" groups="beauty_salon_survey.group_beauty_survey_manager">
+                <app string="Beauty Salon Survey" name="beauty_salon_survey" groups="base.group_system">
                     
                     <!-- BLOQUE 1: UMBRALES -->
                     <block title="Umbrales de Calificación" name="survey_thresholds">

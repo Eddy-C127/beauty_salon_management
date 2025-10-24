@@ -109,6 +109,9 @@ class CalendarEvent(models.Model):
     def onchange_real_employee_id(self):
         """
         ISSUE #2: Al cambiar empleado real, asigna organizador virtual aleatorio
+        
+        NOTA: La actualización del vendedor en SO se hace en write() al guardar.
+        Este onchange solo actualiza organizador/asistentes para feedback visual inmediato.
         """
         if self.real_employee_id:
             # Buscar empleados virtuales asociados al empleado real
@@ -170,6 +173,44 @@ class CalendarEvent(models.Model):
         if attendees:
             self.partner_ids = [(6, 0, attendees)]
             _logger.info(f"Asistentes manuales actualizados: {attendees}")
+
+# ===== OVERRIDE WRITE =====
+    def write(self, vals):
+        """
+        Override write para:
+        1. Actualizar vendedor en SO cuando cambia real_employee_id
+        2. Mantener compatibilidad con flujos existentes
+        """
+        res = super(CalendarEvent, self).write(vals)
+        
+        # 🎯 NUEVO: Si cambió el empleado real, actualizar vendedor en SO
+        if 'real_employee_id' in vals:
+            for event in self:
+                if not event.real_employee_id or not event.real_employee_id.user_id:
+                    continue
+                
+                sale_order = None
+                
+                # Caso 1: Cita MANUAL con sale_order_id directo
+                if event.sale_order_id:
+                    sale_order = event.sale_order_id
+                
+                # Caso 2: Cita WEBSITE con sale_order_line_ids
+                elif event.sale_order_line_ids:
+                    sale_order = event.sale_order_line_ids[0].order_id
+                
+                # Actualizar vendedor si existe SO
+                if sale_order:
+                    sale_order.write({
+                        'user_id': event.real_employee_id.user_id.id
+                    })
+                    _logger.info(
+                        f'✅ Vendedor actualizado en SO #{sale_order.name}: '
+                        f'{event.real_employee_id.user_id.name} (Cita #{event.id})'
+                    )
+        
+        return res
+
 
     # ===== CRUD METHODS =====
     @api.model_create_multi

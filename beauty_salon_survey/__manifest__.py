@@ -37,7 +37,8 @@ Accede a Settings > General Settings > Beauty Salon Survey
         
         # Data (valores por defecto)
         'data/pop_survey_config_data.xml',
-        'data/mail_activity_type.xml',      # ← NUEVO
+        'data/mail_activity_type.xml',
+        #'data/ir_cron.xml',
         
         # Views
         'views/res_config_settings_views.xml',
