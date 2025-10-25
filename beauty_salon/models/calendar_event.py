@@ -115,7 +115,8 @@ class CalendarEvent(models.Model):
         """
         if self.real_employee_id:
             # Buscar empleados virtuales asociados al empleado real
-            virtual_employees = self.env['hr.employee'].search([
+            # ✅ FIX: Usar .sudo() para evitar redirección a hr.employee.public
+            virtual_employees = self.env['hr.employee'].sudo().search([
                 ('is_virtual_resource', '=', True),
                 ('default_real_employee_id', '=', self.real_employee_id.id)
             ])
@@ -134,11 +135,16 @@ class CalendarEvent(models.Model):
             if not self.sale_order_line_ids:
                 self._update_attendees_manual()
             
-            # Actualizar vendedor en SO si existe
+            # ✅ FIX: Actualizar vendedor en SO con .sudo() para evitar regla "Personal Orders"
             if self.sale_order_line_ids:
-                so = self.sale_order_line_ids[0].order_id
+                # Usar sudo() ANTES de acceder a order_id para evitar regla de lectura
+                so = self.sale_order_line_ids.sudo()[0].order_id
                 if so:
                     so.write({'user_id': self.real_employee_id.user_id.id})
+                    _logger.info(
+                        f'✅ Vendedor actualizado en SO #{so.name} (onchange): '
+                        f'{self.real_employee_id.user_id.id}'
+                    )
 
     @api.onchange('manual_customer_id')
     def onchange_manual_customer_id(self):
@@ -193,13 +199,14 @@ class CalendarEvent(models.Model):
                 
                 # Caso 1: Cita MANUAL con sale_order_id directo
                 if event.sale_order_id:
-                    sale_order = event.sale_order_id
+                    sale_order = event.sale_order_id.sudo()
                 
                 # Caso 2: Cita WEBSITE con sale_order_line_ids
                 elif event.sale_order_line_ids:
-                    sale_order = event.sale_order_line_ids[0].order_id
+                    # Usar sudo() ANTES de acceder a order_id
+                    sale_order = event.sale_order_line_ids.sudo()[0].order_id
                 
-                # Actualizar vendedor si existe SO
+                # ✅ FIX: Actualizar vendedor con .sudo() para evitar regla "Personal Orders"
                 if sale_order:
                     sale_order.write({
                         'user_id': event.real_employee_id.user_id.id
