@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Vista de Formulario -->
+    <record id="appointment_type_view_form_auth" model="ir.ui.view">
+        <field name="name">appointment.type.form.auth</field>
+        <field name="model">appointment.type</field>
+        <field name="inherit_id" ref="appointment.appointment_type_view_form"/>
+        <field name="arch" type="xml">
+            
+            <!-- Agregar campo después de website_published -->
+            <xpath expr="//field[@name='website_published']" position="after">
+                
+                <field name="require_login"/>
+                
+                <!-- Mensaje de ayuda cuando está activado -->
+                <div class="alert alert-info mt-2" 
+                     role="alert"
+                     invisible="not require_login">
+                    <strong>🔒 Authentication Required</strong>
+                    <p class="mb-0">
+                        Users must login or create an account before booking this appointment.
+                        This prevents duplicate contacts and ensures better customer tracking.
+                    </p>
+                </div>
+                
+                <!-- Mensaje de advertencia cuando está desactivado -->
+                <div class="alert alert-warning mt-2" 
+                     role="alert"
+                     invisible="require_login">
+                    <strong>⚠️ Public Booking Enabled</strong>
+                    <p class="mb-0">
+                        Users can book without login. This may create duplicate contacts 
+                        if they later create an account during checkout.
+                    </p>
+                </div>
+                
+            </xpath>
+            
+        </field>
+    </record>
+
+</odoo>
