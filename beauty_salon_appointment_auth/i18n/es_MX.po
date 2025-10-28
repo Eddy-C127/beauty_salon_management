@@ -1,0 +1,95 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* beauty_salon_appointment_auth
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-28 04:00:00+0000\n"
+"PO-Revision-Date: 2025-10-28 04:00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es_MX\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: beauty_salon_appointment_auth
+#: model:ir.model.fields,field_description:beauty_salon_appointment_auth.field_appointment_type__require_login
+msgid "Require Login to Book"
+msgstr "Requiere inicio de sesión para reservar"
+
+#. module: beauty_salon_appointment_auth
+#: model:ir.model.fields,help:beauty_salon_appointment_auth.field_appointment_type__require_login
+msgid ""
+"If enabled, users must login or create an account before booking.\n"
+"This prevents duplicate contact creation and ensures better traceability.\n"
+"\n"
+"• Disabled: Users can book without login (may create duplicates)\n"
+"• Enabled: Users must authenticate first (recommended for all services)"
+msgstr ""
+"Si está activado, los usuarios deben iniciar sesión o crear una cuenta antes de reservar.\n"
+"Esto previene la creación de contactos duplicados y asegura mejor rastreabilidad.\n"
+"\n"
+"• Desactivado: Los usuarios pueden reservar sin iniciar sesión (puede crear duplicados)\n"
+"• Activado: Los usuarios deben autenticarse primero (recomendado para todos los servicios)"
+
+#. module: beauty_salon_appointment_auth
+#: model_terms:ir.ui.view,arch_db:beauty_salon_appointment_auth.appointment_type_view_form_auth
+msgid "Authentication Settings"
+msgstr "Configuración de autenticación"
+
+#. module: beauty_salon_appointment_auth
+#: model_terms:ir.ui.view,arch_db:beauty_salon_appointment_auth.appointment_type_view_form_auth
+msgid "🔒 Authentication Required"
+msgstr "🔒 Autenticación requerida"
+
+#. module: beauty_salon_appointment_auth
+#: model_terms:ir.ui.view,arch_db:beauty_salon_appointment_auth.appointment_type_view_form_auth
+msgid ""
+"Users must login or create an account before booking this appointment.\n"
+"This prevents duplicate contacts and ensures better customer tracking."
+msgstr ""
+"Los usuarios deben iniciar sesión o crear una cuenta antes de reservar esta cita.\n"
+"Esto previene contactos duplicados y asegura un mejor seguimiento de clientes."
+
+#. module: beauty_salon_appointment_auth
+#: model_terms:ir.ui.view,arch_db:beauty_salon_appointment_auth.appointment_type_view_form_auth
+msgid "⚠️ Public Booking Enabled"
+msgstr "⚠️ Reservación pública activada"
+
+#. module: beauty_salon_appointment_auth
+#: model_terms:ir.ui.view,arch_db:beauty_salon_appointment_auth.appointment_type_view_form_auth
+msgid ""
+"Users can book without login. This may create duplicate contacts\n"
+"if they later create an account during checkout."
+msgstr ""
+"Los usuarios pueden reservar sin iniciar sesión. Esto puede crear contactos duplicados\n"
+"si después crean una cuenta durante el proceso de pago."
+
+#. module: beauty_salon_appointment_auth
+#: model_terms:ir.ui.view,arch_db:beauty_salon_appointment_auth.appointment_form_auth_buttons
+msgid "Sign in to continue"
+msgstr "Inicia sesión para continuar"
+
+#. module: beauty_salon_appointment_auth
+#: model_terms:ir.ui.view,arch_db:beauty_salon_appointment_auth.appointment_form_auth_buttons
+msgid "You need to have an account to book"
+msgstr "Necesitas tener una cuenta para reservar"
+
+#. module: beauty_salon_appointment_auth
+#: model_terms:ir.ui.view,arch_db:beauty_salon_appointment_auth.appointment_form_auth_buttons
+msgid "I already have an account"
+msgstr "Ya tengo una cuenta"
+
+#. module: beauty_salon_appointment_auth
+#: model_terms:ir.ui.view,arch_db:beauty_salon_appointment_auth.appointment_form_auth_buttons
+msgid "Create an account"
+msgstr "Crear una cuenta"
+
+#. module: beauty_salon_appointment_auth
+#: model:ir.model,name:beauty_salon_appointment_auth.model_appointment_type
+msgid "Appointment Type"
+msgstr "Tipo de cita"

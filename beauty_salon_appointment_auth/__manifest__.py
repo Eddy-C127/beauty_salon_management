@@ -16,6 +16,7 @@ Features:
 * Configurable per appointment type (boolean field)
 * Maintains full backward compatibility
 * Preserves all booking parameters during login flow
+* Visual restriction: hides submit button for public users
 * Clean integration with Odoo's native authentication
     """,
     'author': 'Pop Studio',
@@ -27,6 +28,7 @@ Features:
     ],
     'data': [
         'views/appointment_type_views.xml',
+        'views/appointment_form_auth_template.xml',
     ],
     'installable': True,
     'application': False,
