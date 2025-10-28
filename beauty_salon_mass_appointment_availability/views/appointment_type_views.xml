@@ -8,12 +8,15 @@
         <field name="inherit_id" ref="appointment.appointment_type_view_form"/>
         <field name="arch" type="xml">
             
-            <!-- Agregar campo de categorías Many2many después del nombre -->
-            <xpath expr="//field[@name='name']" position="after">
-                <field name="appointment_category_ids" 
-                       widget="many2many_tags"
-                       options="{'color_field': 'color', 'no_create_edit': True}"
-                       placeholder="Seleccione categorías..."/>
+            <!-- Agregar campo de categorías Many2many después de appointment_duration con label propio -->
+            <xpath expr="//div[field[@name='appointment_duration']]" position="after">
+                <label for="appointment_category_ids" string="Categorías de Servicio"/>
+                <div>
+                    <field name="appointment_category_ids" 
+                           widget="many2many_tags"
+                           options="{'color_field': 'color', 'no_create_edit': True}"
+                           placeholder="Seleccione categorías..."/>
+                </div>
             </xpath>
             
             <!-- Agregar estado de disponibilidad en el header -->
@@ -44,7 +47,7 @@
         <field name="inherit_id" ref="appointment.appointment_type_view_tree"/>
         <field name="arch" type="xml">
             
-            <!-- ✅ CORREGIDO: Sin branch_id -->
+            <!-- Agregar campos en la lista -->
             <xpath expr="//field[@name='name']" position="after">
                 <field name="appointment_category_ids" 
                        widget="many2many_tags" 
