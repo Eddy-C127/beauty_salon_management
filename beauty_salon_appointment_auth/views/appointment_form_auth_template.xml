@@ -42,11 +42,11 @@
                     <div class="d-inline-flex gap-2">
                         <a href="#" class="btn btn-outline-secondary o_appointment_auth_login_btn">
                             <i class="fa fa-sign-in me-1"/>
-                            I already have an account
+                            Ya tengo una cuenta
                         </a>
                         <a href="#" class="btn btn-primary o_appointment_auth_signup_btn">
                             <i class="fa fa-user-plus me-1"/>
-                            Create an account
+                            Crear una cuenta
                         </a>
                     </div>
                 </div>
