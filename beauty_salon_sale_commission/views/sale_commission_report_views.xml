@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Vista lista del reporte de comisión, movida de 'beauty_salon' -->
+    <record id="sale_commission_report_view_list_inherit" model="ir.ui.view">
+        <field name="name">sale.commission.report.view.list.inherit</field>
+        <field name="model">sale.commission.report</field>
+        <field name="inherit_id" ref="sale_commission.sale_commission_report_view_list"/>
+        <field name="arch" type="xml">
+            <field name="user_id" position="after">
+                <field name="real_employee_id" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda del reporte de comisión, movida de 'beauty_salon' -->
+    <record id="sale_commission_report_view_search_inherit" model="ir.ui.view">
+        <field name="name">sale.commission.report.view.search.inherit</field>
+        <field name="model">sale.commission.report</field>
+        <field name="inherit_id" ref="sale_commission.sale_commission_report_view_search"/>
+        <field name="arch" type="xml">
+            <field name="plan_id" position="after">
+                <field name="real_employee_id"/>
+            </field>
+            <filter name="group_by_plan" position="after">
+                <filter string="Real Employee" name="group_by_real_employee" context="{'group_by':'real_employee_id'}"/>
+            </filter>
+        </field>
+    </record>
+
+</odoo>

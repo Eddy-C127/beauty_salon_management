@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Agregar date_fully_invoiced en el formulario de Sale Order -->
+    <record id="view_order_form_inherit_fully_invoiced_date" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.fully.invoiced.date</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar el campo después del segundo invoice_status (el invisible) -->
+            <xpath expr="//group[@name='sale_info']//field[@name='invoice_status' and @invisible='1']" position="after">
+                <field name="date_fully_invoiced" 
+                       readonly="1"
+                       invisible="invoice_status != 'invoiced'"
+                       widget="datetime"
+                       string="Fully Invoiced Date"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

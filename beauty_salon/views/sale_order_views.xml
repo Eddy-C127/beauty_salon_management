@@ -16,6 +16,19 @@
                         groups="base.group_user">
                     <field name="calendar_event_id" widget="statinfo" string="Appointment"/>
                 </button>
+                                <!-- 🆕 NUEVO: Botón Actualizar Servicio -->
+                <button name="action_sync_service_from_appointment"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-refresh"
+                        invisible="state == 'cancel'"
+                        groups="sales_team.group_sale_salesman"
+                        help="Sincroniza los servicios de las líneas con los cambios realizados en las citas">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Actualizar</span>
+                        <span class="o_stat_text">Servicio</span>
+                    </div>
+                </button>
             </xpath>
 
             <!-- Agregar campo aux_branch_id -->

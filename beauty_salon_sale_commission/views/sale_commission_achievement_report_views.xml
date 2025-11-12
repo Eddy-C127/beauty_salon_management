@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Extender la vista list del reporte de achievements -->
+    <record id="sale_achievement_report_view_list_inherit" model="ir.ui.view">
+        <field name="name">sale.commission.achievement.report.view.list.inherit</field>
+        <field name="model">sale.commission.achievement.report</field>
+        <field name="inherit_id" ref="sale_commission.sale_achievement_report_view_list"/>
+        <field name="arch" type="xml">
+            <!-- Agregar los campos después de 'date' -->
+            <field name="date" position="after">
+                <field name="date_fully_invoiced" 
+                       optional="show" 
+                       string="Fully Invoiced Date"
+                       widget="datetime"/>
+                <field name="partner_id" 
+                       optional="show" 
+                       string="Customer"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Extender la vista search del reporte de achievements -->
+    <record id="sale_achievement_report_view_search_inherit" model="ir.ui.view">
+        <field name="name">sale.commission.achievement.report.view.search.inherit</field>
+        <field name="model">sale.commission.achievement.report</field>
+        <field name="inherit_id" ref="sale_commission.sale_achievement_report_view_search"/>
+        <field name="arch" type="xml">
+            
+            <!-- CORRECCIÓN: Anclamos todo al campo 'target_id' que es más estable -->
+            <field name="target_id" position="after">
+                <!-- 1. Agregar campos de búsqueda -->
+                <field name="partner_id" string="Customer"/>
+                <field name="date_fully_invoiced" string="Fully Invoiced Date"/>
+                
+                <!-- 2. Agregar filtros de fecha para 'date_fully_invoiced' -->
+                <filter string="Fully Invoiced Date" name="filter_date_fully_invoiced" date="date_fully_invoiced"/>
+                <separator/>
+                <filter string="Last Month (Fully Invoiced)"
+                        name="last_month_invoiced"
+                        domain="[('date_fully_invoiced', '&gt;=', (context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')), 
+                                 ('date_fully_invoiced', '&lt;', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="First Half of Month (1-15)" 
+                        name="first_half"
+                        domain="[('date_fully_invoiced', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')), 
+                                 ('date_fully_invoiced', '&lt;=', (context_today() + relativedelta(day=15)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Second Half of Month (16-31)" 
+                        name="second_half"
+                        domain="[('date_fully_invoiced', '&gt;=', (context_today() + relativedelta(day=16)).strftime('%Y-%m-%d')), 
+                                 ('date_fully_invoiced', '&lt;=', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d'))]"/>
+            </field>
+            
+            <!-- Agregar agrupaciones (este anclaje suele ser seguro) -->
+            <filter name="company" position="after">
+                <filter string="Customer" 
+                        name="group_partner" 
+                        context="{'group_by':'partner_id'}"/>
+                <filter string="Fully Invoiced Date" 
+                        name="group_date_fully_invoiced" 
+                        context="{'group_by':'date_fully_invoiced:month'}"/>
+            </filter>
+
+        </field>
+    </record>
+
+</odoo>

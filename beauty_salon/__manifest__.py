@@ -24,7 +24,6 @@
     "data": [
         "views/hr_employee_views.xml",
         "views/calendar_event_views.xml",
-        "views/sale_commissions_views.xml",
         "views/appointment_type_views.xml",
         "views/sale_order_views.xml",
     ],

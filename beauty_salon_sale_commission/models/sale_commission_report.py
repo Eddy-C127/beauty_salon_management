@@ -30,6 +30,14 @@ class SaleCommissionReport(models.Model):
         teams = self.env.context.get('commission_team_ids', [])
         if teams:
             teams = self.env['crm.team'].browse(teams).exists()
+            
+        # --- INICIO DE LA CORRECCIÓN ---
+        # 1. Obtener la zona horaria (la misma de tu otro reporte)
+        tz = self.env.user.tz or self.env.company.partner_id.tz or 'America/Mexico_City'
+        
+        # 2. Definir la cadena de texto corregida
+        corrected_date_check = f"(cl.date AT TIME ZONE 'UTC' AT TIME ZONE '{tz}')::date"
+        # --- FIN DE LA CORRECCIÓN ---
 
         return f"""
 WITH {self.env['sale.commission.achievement.report']._commission_lines_query(users=users, teams=teams)},
@@ -51,7 +59,6 @@ achievement AS (
         MAX(era.date_to) AS payment_date,
         MAX(scpf.id) AS forecast_id,
         MAX(scpf.amount) AS forecast,
-        -- NUEVO: derivamos el empleado real a partir del usuario
         MIN(he.id) AS real_employee_id
     FROM sale_commission_plan_target era
     LEFT JOIN sale_commission_plan_user u
@@ -60,12 +67,14 @@ achievement AS (
         AND COALESCE(u.date_to, era.date_to)>era.date_from
     LEFT JOIN commission_lines cl
         ON cl.plan_id = era.plan_id
-        AND cl.date >= era.date_from
-        AND cl.date <= era.date_to
+        /* --- INICIO DE LA CORRECCIÓN --- */
+        /* Aplicar la corrección de TZ antes de comparar las fechas */
+        AND {corrected_date_check} >= era.date_from
+        AND {corrected_date_check} <= era.date_to
+        /* --- FIN DE LA CORRECCIÓN --- */
         AND cl.user_id = u.user_id
     LEFT JOIN sale_commission_plan_target_forecast scpf
         ON (scpf.target_id = era.id AND u.user_id = scpf.user_id)
-    -- NUEVO: relación usuario -> empleado
     LEFT JOIN hr_employee he ON he.user_id = u.user_id
     GROUP BY
         era.id,
@@ -99,7 +108,6 @@ achievement AS (
         sum(a.amount) AS target_amount,
         sum(a.forecast) as forecast,
         count(1) as ct,
-        -- NUEVO: propagamos el employee
         a.real_employee_id as real_employee_id
     FROM achievement a
     GROUP BY

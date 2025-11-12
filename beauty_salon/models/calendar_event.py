@@ -306,10 +306,16 @@ class CalendarEvent(models.Model):
             'product_id': product.id,
             'product_uom_qty': 1,
             'name': product.name or self.appointment_type_id.name,
+            'calendar_event_id': self.id,  # 🆕 VINCULACIÓN LÍNEA-NIVEL
         }
 
-        self.env['sale.order.line'].create(line_vals)
+        line = self.env['sale.order.line'].create(line_vals)
         self.sale_order_id = sale_order.id
+        
+        _logger.info(
+            f'✅ Vinculación dual establecida en flujo manual: '
+            f'Cita #{self.id} ↔ SO #{sale_order.name} ↔ Línea #{line.id}'
+        )
 
         return {
             'type': 'ir.actions.act_window',
