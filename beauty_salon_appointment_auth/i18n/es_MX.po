@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-28 04:00:00+0000\n"
-"PO-Revision-Date: 2025-10-28 04:00:00+0000\n"
+"PO-Revision-Date: 2025-10-28 05:00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es_MX\n"
@@ -93,3 +93,13 @@ msgstr "Crear una cuenta"
 #: model:ir.model,name:beauty_salon_appointment_auth.model_appointment_type
 msgid "Appointment Type"
 msgstr "Tipo de cita"
+
+#. module: beauty_salon_appointment_auth
+#: model_terms:ir.ui.view,arch_db:beauty_salon_appointment_auth.appointment_type_view_form_auth
+msgid "Users can book without login. This may create duplicate contacts if they later create an account during checkout."
+msgstr "Los usuarios pueden reservar sin iniciar sesión. Esto puede crear contactos duplicados si después crean una cuenta durante el proceso de pago."
+
+#. module: beauty_salon_appointment_auth
+#: model_terms:ir.ui.view,arch_db:beauty_salon_appointment_auth.appointment_type_view_form_auth
+msgid "Users must login or create an account before booking this appointment. This prevents duplicate contacts and ensures better customer tracking."
+msgstr "Los usuarios deben iniciar sesión o crear una cuenta antes de reservar esta cita. Esto previene contactos duplicados y asegura un mejor seguimiento de clientes."
