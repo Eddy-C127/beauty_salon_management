@@ -2,34 +2,39 @@
 <odoo>
     <template id="total_inherit" inherit_id="website_sale.total">
         <xpath expr="//tr[@id='order_total_taxes']" position="after">
-            <t t-set="calendar_booking_ids" t-value="website_sale_order.website_order_line[0].calendar_booking_ids.appointment_type_id"/>
-            <t t-if="calendar_booking_ids.advance_type and calendar_booking_ids.advance_type=='advance_percentage'">
-                <tr id="tr_use_advance_percentage">
-                    <td class="text-muted border-0 ps-0 pt-0 pb-3" colspan="2" id="td_use_advance_percentage">
-                        <strong style="color: red;">Anticipo 
-                            
-                    </strong>
-                        <strong style="color: red;">
-                            <span style="{color:red;}" t-esc="calendar_booking_ids.advance_percentage"/>%</strong>
-                    </td>
-                    <td class="text-end border-0 pe-0 pt-0 pb-3">
-                        <strong style="color: red;">$
-                        
-                            <span style="{color:red;}" t-esc="website_sale_order.amount_total*(calendar_booking_ids.advance_percentage/100)"/></strong>
-                    </td>
-                </tr>
+            <!-- Calcular el TOTAL de anticipos de todas las citas -->
+            <t t-set="total_advance" t-value="0"/>
+            <t t-set="advance_count" t-value="0"/>
+            <t t-foreach="website_sale_order.website_order_line" t-as="line">
+                <t t-if="line.calendar_booking_ids">
+                    <t t-foreach="line.calendar_booking_ids" t-as="booking">
+                        <t t-set="apt_type" t-value="booking.appointment_type_id"/>
+                        <t t-if="apt_type and apt_type.advance_type == 'advance_percentage'">
+                            <t t-set="total_advance" t-value="total_advance + (line.price_subtotal * apt_type.advance_percentage / 100)"/>
+                            <t t-set="advance_count" t-value="advance_count + 1"/>
+                        </t>
+                        <t t-if="apt_type and apt_type.advance_type == 'fixed_import'">
+                            <t t-set="total_advance" t-value="total_advance + apt_type.fixed_import"/>
+                            <t t-set="advance_count" t-value="advance_count + 1"/>
+                        </t>
+                    </t>
+                </t>
             </t>
-            <t t-if="calendar_booking_ids.advance_type and calendar_booking_ids.advance_type=='fixed_import'">
-                <tr id="tr_use_advance_percentage">
-                    <td class="text-muted border-0 ps-0 pt-0 pb-3" colspan="2" id="td_use_advance_percentage">
-                        <strong style="color: red;">Anticipo a pagar 
-                            
-                    </strong>
+            <!-- Mostrar UNA sola línea con el total de anticipos -->
+            <t t-if="total_advance > 0">
+                <tr id="tr_total_advance">
+                    <td class="text-muted border-0 ps-0 pt-0 pb-3" colspan="2">
+                        <strong style="color: red;">
+                            Anticipo a pagar
+                            <t t-if="advance_count > 1">
+                                (<span t-esc="advance_count"/> servicios)
+                            </t>
+                        </strong>
                     </td>
                     <td class="text-end border-0 pe-0 pt-0 pb-3">
                         <strong style="color: red;">$
-                        
-                            <span style="{color:red;}" t-esc="'%.2f'% (calendar_booking_ids.fixed_import)"/></strong>
+                            <span t-esc="'%.2f' % total_advance"/>
+                        </strong>
                     </td>
                 </tr>
             </t>
