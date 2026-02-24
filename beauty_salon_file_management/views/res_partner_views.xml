@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         EXTENSIÓN DE VISTA: res.partner
+         Agrega pestaña "Expediente" con datos médicos y historial de sesiones
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── SMART BUTTON: Contador de Sesiones ──────────────────────────── -->
+    <record id="view_partner_expediente_buttons" model="ir.ui.view">
+        <field name="name">res.partner.expediente.buttons</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Smart buttons en el área de botones superiores -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <!-- Botón de progreso del expediente -->
+                <button name="action_ver_sesiones"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-check-circle"
+                        invisible="not expediente_listo">
+                    <field name="expediente_progreso" widget="statinfo" string="Expediente"/>
+                </button>
+                <button name="action_ver_sesiones"
+                        type="object"
+                        class="oe_stat_button ps-btn-expediente-incompleto"
+                        icon="fa-exclamation-circle"
+                        invisible="expediente_listo">
+                    <field name="expediente_progreso" widget="statinfo" string="Expediente"/>
+                </button>
+                <!-- Contador de sesiones -->
+                <button name="action_ver_sesiones"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-heartbeat"
+                        invisible="sesion_count == 0">
+                    <field name="sesion_count" string="Sesiones" widget="statinfo"/>
+                </button>
+                <button name="action_ver_sesiones"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-camera"
+                        invisible="sesion_count != 0">
+                    <span class="o_stat_text">Sin Sesiones</span>
+                </button>
+            </xpath>
+
+            <!-- Switch Modo Expediente para UI Limpia -->
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <div class="d-flex justify-content-end mb-2 ps-switch-container">
+                    <label for="ps_ocultar_datos_contacto" class="fw-bold text-muted me-2" string="Modo Expediente (Ocultar Detalles)"/>
+                    <field name="ps_ocultar_datos_contacto" widget="boolean_toggle"/>
+                </div>
+            </xpath>
+
+            <!-- Ocultar elementos secundarios del header original (Company type, parent_id) -->
+            <xpath expr="//field[@name='company_type']" position="attributes">
+                <attribute name="invisible">ps_ocultar_datos_contacto</attribute>
+            </xpath>
+            <xpath expr="//field[@name='parent_id']/parent::div" position="attributes">
+                <attribute name="invisible">ps_ocultar_datos_contacto</attribute>
+            </xpath>
+
+            <!-- Grupo resumido que solo se muestra cuando el switch está activo -->
+            <xpath expr="//span[@name='address_name']/parent::group/parent::group" position="before">
+                <group invisible="not ps_ocultar_datos_contacto" class="ps-grupo-esencial">
+                    <group>
+                        <field name="phone" widget="phone" string="Teléfono"/>
+                        <field name="mobile" widget="phone" string="Celular"/>
+                        <field name="email" widget="email" string="Correo Electrónico"/>
+                    </group>
+                    <group>
+                        <field name="lang" string="Idioma"/>
+                        <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="Etiquetas..."/>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- Ocultar el grupo original si el switch está activo -->
+            <xpath expr="//span[@name='address_name']/parent::group/parent::group" position="attributes">
+                <attribute name="invisible">ps_ocultar_datos_contacto</attribute>
+            </xpath>
+
+            <!-- Ocultar pestañas no requeridas en Modo Expediente -->
+            <xpath expr="//page[@name='contact_addresses']" position="attributes">
+                <attribute name="invisible">ps_ocultar_datos_contacto</attribute>
+            </xpath>
+            <xpath expr="//page[@name='internal_notes']" position="attributes">
+                <attribute name="invisible">ps_ocultar_datos_contacto</attribute>
+            </xpath>
+
+            <!-- Ocultar pestaña Facturación (Accounting) -->
+            <xpath expr="//page[@name='accounting'] | //page[@name='accounting_disabled']" position="attributes">
+                <attribute name="invisible">ps_ocultar_datos_contacto</attribute>
+            </xpath>
+
+            <!-- Ocultar pestaña Ventas y Compras -->
+            <xpath expr="//page[@name='sales_purchases']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+
+            <!-- Agregar pestaña "Expediente" como primera pestaña -->
+            <xpath expr="//notebook/page[1]" position="before">
+                <page string="🩺 Expediente Clínico" name="expediente_clinico"
+                      class="ps-expediente-tab">
+
+                    <!-- Barra de Progreso del Expediente -->
+                    <div class="ps-progreso-container mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold small text-muted">
+                                <i class="fa fa-folder-open"/> Completitud del Expediente
+                            </span>
+                        </div>
+                        <field name="expediente_progreso"
+                               widget="progressbar"
+                               nolabel="1"
+                               readonly="1"
+                               options="{'max_value': 100, 'edit': false}"/>
+                        <div class="mt-1 d-flex gap-2 flex-wrap align-items-center">
+                            <span invisible="not expediente_listo" class="badge bg-success">
+                                <i class="fa fa-check-circle"/> Expediente Completo
+                            </span>
+                            <span invisible="expediente_listo" class="badge bg-danger">
+                                <i class="fa fa-times-circle"/> Expediente Incompleto
+                            </span>
+                            <span invisible="expediente_vigente or not expediente_listo"
+                                  class="badge bg-warning">
+                                <i class="fa fa-clock-o"/> Requiere Actualización
+                            </span>
+                            <span class="text-muted small ms-1" invisible="not expediente_fecha_actualizacion">
+                                <i class="fa fa-history"/>
+                                Últ. actualización:
+                                <field name="expediente_fecha_actualizacion" readonly="1" nolabel="1"/>
+                            </span>
+                            <span class="text-muted small ms-1" invisible="expediente_fecha_actualizacion">
+                                <i class="fa fa-history"/> Sin actualizaciones registradas
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Aviso de Privacidad y Cumplimiento LFPDPPP -->
+                    <div class="alert alert-success ps-privacy-badge"
+                         invisible="not aviso_privacidad_aceptado">
+                        <i class="fa fa-shield fa-lg"/> 
+                        <strong>✅ Aviso de Privacidad Aceptado</strong>
+                        <small class="ms-2">
+                            <field name="aviso_privacidad_fecha" readonly="1"/>
+                        </small>
+                    </div>
+                    <div class="alert alert-warning ps-privacy-badge"
+                         invisible="aviso_privacidad_aceptado">
+                        <i class="fa fa-exclamation-triangle"/>
+                        <strong> ⚠️ Aviso de Privacidad PENDIENTE</strong>
+                        <br/>
+                        <small>La clienta no ha aceptado el aviso de privacidad (LFPDPPP). 
+                        Regístrar datos médicos requiere consentimiento previo.</small>
+                    </div>
+
+                    <group>
+                        <!-- Consentimiento -->
+                        <group string="🔒 Privacidad y Consentimiento (LFPDPPP)" col="2">
+                            <field name="aviso_privacidad_aceptado" widget="boolean_toggle"/>
+                            <field name="aviso_privacidad_fecha" readonly="1"/>
+                            <field name="proxima_visita_recomendada"/>
+                            <field name="ultima_sesion_fecha" readonly="1"/>
+                        </group>
+
+                        <!-- Datos médicos básicos -->
+                        <group string="⚕️ Datos Médicos Básicos (NOM-004-SSA3-2012)" col="2">
+                            <field name="tipo_expediente" widget="radio" options="{'horizontal': true}"/>
+                            <field name="fecha_nacimiento"/>
+                            <field name="tipo_piel" invisible="tipo_expediente not in ('facial', 'otro')"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <!-- Configuración Dinámica Cuestionario Facial -->
+                        <group string="✨ Cuestionario: Facial" invisible="tipo_expediente != 'facial'">
+                            <field name="facial_embarazada" widget="radio" options="{'horizontal': true}"/>
+                            <field name="facial_problemas_piel" widget="boolean_toggle"/>
+                            <field name="facial_otros" placeholder="Acné severo, rosácea, dermatitis..."/>
+                        </group>
+
+                        <!-- Configuración Dinámica Cuestionario Capilar -->
+                        <group string="💇‍♀️ Cuestionario: Capilar" invisible="tipo_expediente != 'capilar'">
+                            <field name="capilar_sensibilidad" widget="boolean_toggle"/>
+                            <field name="capilar_alopecia" widget="boolean_toggle"/>
+                            <field name="capilar_otros" placeholder="Tratamientos de keratina previos, decoloraciones..."/>
+                        </group>
+                    </group>
+
+                    <!-- Alergias - Destacadas en rojo si existen -->
+                    <div class="ps-alergias-container">
+                        <div class="ps-alergias-header">
+                            <i class="fa fa-exclamation-triangle text-danger"/> 
+                            Alergias Conocidas
+                        </div>
+                        <field name="alergias"
+                               placeholder="⚠️ IMPORTANTE: Registra aquí TODAS las alergias conocidas a productos, tintes, materiales, látex, etc."
+                               class="ps-alergias-field"
+                               nolabel="1"/>
+                    </div>
+
+                    <group>
+                        <group string="🩺 Condiciones Médicas">
+                            <field name="condiciones_medicas"
+                                   placeholder="Diabetes, embarazo, psoriasis, tratamientos activos, implantes..."
+                                   nolabel="1"/>
+                        </group>
+                        <group string="💊 Medicamentos Actuales">
+                            <field name="medicamentos_actuales"
+                                   placeholder="Medicamentos que puedan contraindicar tratamientos..."
+                                   nolabel="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Notas privadas: solo managers -->
+                    <group groups="beauty_salon_file_management.group_popstudio_manager">
+                        <separator string="🔐 Notas Privadas (Solo Managers)"/>
+                        <field name="notas_privadas_expediente"
+                               widget="html"
+                               nolabel="1"
+                               placeholder="Notas confidenciales del expediente..."
+                               style="min-height: 80px;"/>
+                    </group>
+
+                    <!-- Historial de Sesiones (One2many) -->
+                    <separator string="📋 Historial de Sesiones"/>
+                    <field name="sesion_ids"
+                           widget="one2many"
+                           mode="list"
+                           nolabel="1">
+                        <list string="Sesiones"
+                              decoration-success="state == 'completada'"
+                              decoration-info="state == 'en_curso'"
+                              default_order="fecha_sesion desc">
+                            <field name="fecha_sesion" string="Fecha"/>
+                            <field name="artista_id" string="Artista" widget="many2one_avatar_user"/>
+                            <field name="servicio_realizado" string="Servicio"/>
+                            <field name="nivel_satisfaccion" string="⭐" widget="priority"/>
+                            <field name="consentimiento_aceptado" widget="boolean_toggle" readonly="1" string="Consentimiento"/>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'completada'"
+                                   decoration-warning="state == 'en_curso'"
+                                   decoration-muted="state == 'borrador'"
+                                   string="Estado"/>
+                            <button name="action_ver_expediente_partner"
+                                    string="Ver"
+                                    type="object"
+                                    icon="fa-eye"
+                                    class="btn-sm btn-secondary"/>
+                        </list>
+                    </field>
+
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

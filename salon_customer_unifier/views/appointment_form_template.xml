@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+        Herencia del formulario de citas (appointment.appointment_form).
+
+        XPaths aplicados en orden (cada uno sobre el resultado del anterior):
+        0. Agregar hidden fields: found_partner_id, correction_name, correction_email
+        A. Insertar campo Teléfono (con intl-tel-input) ANTES del campo Nombre
+        B. Agregar id="name_field" al input de nombre
+        C. Agregar id="email_field" al input de email
+        E. Eliminar el campo Teléfono original (ahora está al inicio)
+        D. Insertar área de mensaje inteligente + formulario de corrección
+           DESPUÉS del campo Email
+    -->
+    <template id="appointment_form_phone_intl"
+              name="Salon: Teléfono primero + Autocomplete + Mensaje"
+              inherit_id="appointment.appointment_form">
+
+        <!-- ── -1: Ocultar "Sign in" cuando la modalidad pública está activa ─── -->
+        <!--
+            El template base muestra el link "Sign in" a usuarios públicos.
+            Cuando salon_public_booking_mode está activo, lo suprimimos
+            para que el flujo sea completamente sin login.
+            website está siempre disponible en el contexto QWeb del website.
+        -->
+        <xpath expr="//t[@t-if=&quot;request.env.user._is_public()&quot;]" position="replace">
+            <t t-if="request.env.user._is_public() and request.env['ir.config_parameter'].sudo().get_param('salon_customer_unifier.public_booking_mode') != 'True'">
+                <span class="mx-1">or</span>
+                <a class="text-primary text-decoration-none"
+                   role="button"
+                   t-att-href="login_with_redirect_url">Sign in</a>
+            </t>
+        </xpath>
+
+        <!-- ── 0: Campos ocultos para el flujo de corrección de datos ────────── -->
+        <!--
+            found_partner_id: ID del partner encontrado por teléfono.
+                El JS lo llena cuando el lookup retorna un match.
+                El backend lo usa para crear la actividad de corrección.
+            correction_name / correction_email: datos que el cliente ingresa
+                en el formulario "¿No eres tú?". Vacíos si no aplica.
+        -->
+        <xpath expr="//input[@name='csrf_token']" position="after">
+            <input type="hidden" name="found_partner_id" id="found_partner_id" value=""/>
+            <input type="hidden" name="correction_name" id="correction_name" value=""/>
+            <input type="hidden" name="correction_email" id="correction_email" value=""/>
+        </xpath>
+
+        <!-- ── A: Insertar campo Teléfono (iti) ANTES del campo Nombre ─────── -->
+        <xpath expr="//input[@name='name']/../.." position="before">
+            <div class="row mb-4">
+                <label class="col-sm-3 col-form-label fw-normal" for="phone_field">
+                    Número de teléfono*
+                </label>
+                <div class="col-sm-9">
+                    <div class="o_salon_phone_wrapper">
+                        <input type="tel"
+                               class="form-control"
+                               name="phone"
+                               id="phone_field"
+                               required="1"
+                               t-att-value="'phone' in partner_data and partner_data['phone']"
+                               placeholder="871 123 4567"
+                               autocomplete="tel"/>
+                        <input type="hidden" name="phone_full" id="phone_full"/>
+                    </div>
+                    <small class="text-danger d-none mt-1 d-block" id="phone_error">
+                        Número de teléfono inválido. Verifica el formato e inténtalo de nuevo.
+                    </small>
+                </div>
+            </div>
+        </xpath>
+
+        <!-- ── B: Agregar id al campo Nombre ────────────────────────────────── -->
+        <xpath expr="//input[@name='name']" position="attributes">
+            <attribute name="id">name_field</attribute>
+        </xpath>
+
+        <!-- ── C: Agregar id al campo Email ─────────────────────────────────── -->
+        <xpath expr="//input[@name='email']" position="attributes">
+            <attribute name="id">email_field</attribute>
+        </xpath>
+
+        <!-- ── E: Eliminar el campo Teléfono original ────────────────────────── -->
+        <xpath expr="//input[@name='email']/../../following-sibling::div[1]" position="replace"/>
+
+        <!-- ── D: Mensaje inteligente + formulario de corrección ─────────────── -->
+        <xpath expr="//input[@name='email']/../.." position="after">
+
+            <!-- Mensaje de estado del lookup (success / warning / info) -->
+            <div id="o_salon_partner_message" class="row mb-2 d-none" aria-live="polite">
+                <div class="col-sm-9 offset-sm-3">
+                    <div class="alert py-2 px-3 mb-0" id="o_salon_partner_alert" role="alert">
+                        <i class="fa me-2" id="o_salon_partner_icon"/>
+                        <span id="o_salon_partner_text"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de solicitud de corrección (visible solo al pulsar ¿No eres tú?) -->
+            <div id="o_salon_correction_form" class="row mb-3 d-none">
+                <div class="col-sm-9 offset-sm-3">
+                    <div class="p-3 border rounded" style="border-color: #ffc107 !important; background-color: #fffdf0;">
+                        <p class="mb-1 small fw-semibold">
+                            <i class="fa fa-pencil me-1 text-warning"/>
+                            Solicitud de corrección de datos
+                        </p>
+                        <p class="mb-2 text-muted small">
+                            Ingresa los datos correctos. Un administrador los actualizará en breve.
+                        </p>
+                        <div class="mb-2">
+                            <input type="text"
+                                   class="form-control form-control-sm"
+                                   id="correction_name_field"
+                                   placeholder="Tu nombre correcto (opcional)"
+                                   autocomplete="off"/>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email"
+                                   class="form-control form-control-sm"
+                                   id="correction_email_field"
+                                   placeholder="Tu correo correcto (opcional)"
+                                   autocomplete="off"/>
+                        </div>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                id="o_salon_cancel_correction">
+                            <i class="fa fa-times me-1"/>Cancelar
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm btn-warning ms-2"
+                                id="o_salon_send_correction">
+                            <i class="fa fa-paper-plane me-1"/>Enviar solicitud
+                        </button>
+                        <!-- Confirmación visible tras envío exitoso -->
+                        <div id="o_salon_correction_sent" class="d-none mt-2">
+                            <span class="text-success small fw-semibold">
+                                <i class="fa fa-check-circle me-1"/>
+                                Solicitud enviada. Un administrador actualizará tus datos en breve.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </xpath>
+
+    </template>
+</odoo>

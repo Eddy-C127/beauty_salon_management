@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+        Herencia del formulario de Tipo de Cita para agregar el campo
+        salon_correction_user_ids en la pestaña Opciones.
+
+        Permite configurar, por cada tipo de cita (sucursal), los usuarios
+        internos que recibirán la actividad cuando un cliente solicite
+        corrección de sus datos desde el formulario web.
+    -->
+    <record id="appointment_type_view_form_salon_correction"
+            model="ir.ui.view">
+        <field name="name">appointment.type.form.salon.correction</field>
+        <field name="model">appointment.type</field>
+        <field name="inherit_id" ref="appointment.appointment_type_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='options']//field[@name='allow_guests']"
+                   position="after">
+                <field name="salon_correction_user_ids"
+                       widget="many2many_tags"
+                       options="{'no_create': True, 'no_create_edit': True}"
+                       placeholder="Selecciona los responsables..."/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

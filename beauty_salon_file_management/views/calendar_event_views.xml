@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         EXTENSIÓN DE VISTA: calendar.event
+         Agrega botones Iniciar/Concluir Cita y campos de auditoría.
+         Reutiliza appointment_status y real_employee_id del módulo base beauty_salon.
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── VISTA FORM ──────────────────────────────────────────────────── -->
+    <record id="view_calendar_event_popstudio_form" model="ir.ui.view">
+        <field name="name">calendar.event.file.mgmt.form</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Añadir Header con Botones de Acción -->
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="action_iniciar_cita"
+                            string="Iniciar Cita"
+                            type="object"
+                            class="oe_highlight ps-btn-iniciar"
+                            icon="fa-play"
+                            invisible="appointment_status != 'booked'"
+                            groups="beauty_salon_file_management.group_popstudio_artista"/>
+                    <button name="action_concluir_cita"
+                            string="Concluir Cita"
+                            type="object"
+                            class="oe_highlight ps-btn-concluir"
+                            icon="fa-check"
+                            invisible="appointment_status != 'attended'"
+                            groups="beauty_salon_file_management.group_popstudio_artista"/>
+                </header>
+            </xpath>
+
+            <!-- Botones en el button_box -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_ver_expediente"
+                        string="Expediente"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-heartbeat"/>
+            </xpath>
+
+            <!-- Alertas después del button_box -->
+            <xpath expr="//div[@name='button_box']" position="after">
+                <!-- Alerta: Expediente incompleto -->
+                <div class="alert alert-danger ps-audit-alert" role="alert"
+                     invisible="appointment_status != 'concluded' or expediente_completado">
+                    <i class="fa fa-times-circle fa-lg" title="Alerta"/>
+                    <strong> EXPEDIENTE INCOMPLETO</strong> — Esta cita fue concluida
+                    pero no tiene expediente valido. <strong>No aplica para comisiones.</strong>
+                </div>
+
+                <!-- Confirmación: Expediente completo -->
+                <div class="alert alert-success ps-audit-success" role="alert"
+                     invisible="not expediente_completado">
+                    <i class="fa fa-check-circle fa-lg" title="OK"/>
+                    <strong> EXPEDIENTE COMPLETO</strong> —
+                    Cita validada para calculo de comisiones.
+                </div>
+
+                <!-- Mostrar alergias si existen -->
+                <div class="alert alert-danger" role="alert" invisible="not alergias_cliente">
+                    <i class="fa fa-exclamation-triangle fa-lg" title="Alergia Médica"/>
+                    <strong> ALERGIAS CONOCIDAS: </strong>
+                    <field name="alergias_cliente" readonly="1" nolabel="1"/>
+                </div>
+
+                <!-- Botones flotantes para MÓVIL (d-md-none = ocultos en desktop) -->
+                <div class="ps-mobile-fab d-md-none">
+                    <button name="action_iniciar_cita"
+                            string="Iniciar Cita"
+                            type="object"
+                            class="btn btn-lg ps-fab-iniciar"
+                            icon="fa-play"
+                            invisible="appointment_status != 'booked'"
+                            groups="beauty_salon_file_management.group_popstudio_artista"/>
+                    <button name="action_concluir_cita"
+                            string="Concluir Cita"
+                            type="object"
+                            class="btn btn-lg ps-fab-concluir"
+                            icon="fa-check"
+                            invisible="appointment_status != 'attended'"
+                            groups="beauty_salon_file_management.group_popstudio_artista"/>
+                </div>
+            </xpath>
+
+            <!-- Agregar campos de auditoría al form -->
+            <xpath expr="//group[1]" position="after">
+                <group string="Expediente" class="ps-cita-group">
+                    <field name="expediente_completado" readonly="1" widget="boolean_toggle"/>
+                    <field name="sesion_id" readonly="1"/>
+                    <field name="inicio_real" readonly="1"/>
+                    <field name="fin_real" readonly="1"/>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ── VISTA LIST (TREE) CON DECORADORES DE AUDITORÍA ──────────────── -->
+    <record id="view_calendar_event_popstudio_list" model="ir.ui.view">
+        <field name="name">calendar.event.file.mgmt.list</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <list string="Citas - Expedientes"
+                  decoration-success="appointment_status == 'concluded' and expediente_completado == True"
+                  decoration-danger="appointment_status == 'concluded' and expediente_completado == False"
+                  decoration-warning="appointment_status == 'attended'"
+                  decoration-info="appointment_status == 'booked'"
+                  default_order="start desc">
+                <field name="start" string="Fecha/Hora"/>
+                <field name="name" string="Cita"/>
+                <field name="manual_customer_id" string="Clienta"/>
+                <field name="real_employee_id" string="Artista" widget="many2one_avatar"/>
+                <field name="appointment_type_id" string="Servicio" optional="show"/>
+                <field name="appointment_status" string="Estado" widget="badge"
+                       decoration-success="appointment_status == 'concluded'"
+                       decoration-warning="appointment_status == 'attended'"
+                       decoration-info="appointment_status == 'booked'"
+                       decoration-danger="appointment_status == 'cancelled'"/>
+                <field name="expediente_completado" string="Expediente"
+                       widget="boolean_toggle" readonly="1"/>
+                <field name="sesion_id" string="Sesión" optional="show"/>
+                <!-- Botones de acción rápida -->
+                <button name="action_iniciar_cita"
+                        string="Iniciar"
+                        type="object"
+                        icon="fa-play"
+                        invisible="appointment_status != 'booked'"
+                        groups="beauty_salon_file_management.group_popstudio_artista"/>
+                <button name="action_concluir_cita"
+                        string="Concluir"
+                        type="object"
+                        icon="fa-check"
+                        invisible="appointment_status != 'attended'"
+                        groups="beauty_salon_file_management.group_popstudio_artista"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── VISTA KANBAN PARA CITAS EN MÓVIL ──────────────────────────────── -->
+    <record id="view_calendar_event_popstudio_kanban" model="ir.ui.view">
+        <field name="name">calendar.event.file.kanban</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <kanban string="Citas de Hoy" class="o_kanban_mobile" default_order="start asc">
+                <field name="name"/>
+                <field name="manual_customer_id"/>
+                <field name="appointment_type_id"/>
+                <field name="start"/>
+                <field name="appointment_status"/>
+                <field name="expediente_completado"/>
+                <field name="sesion_id"/>
+                <field name="alergias_cliente"/>
+                <field name="urgencia_cita"/>
+                <field name="real_employee_id"/>
+                <field name="x_studio_origen_cita"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="ps-kanban-card p-3 #{record.urgencia_cita.raw_value == 'tarde' ? 'ps-urgencia-tarde' : record.urgencia_cita.raw_value == 'ahora' ? 'ps-urgencia-ahora' : record.urgencia_cita.raw_value == 'proxima' ? 'ps-urgencia-proxima' : ''} position-relative">
+                            <!-- Badge de Procedencia (Origen de Cita) -->
+                            <div t-if="record.x_studio_origen_cita.value"
+                                 class="position-absolute pt-1 pb-1 pe-2 ps-2"
+                                 style="top: 0; right: 0; background-color: black; color: white; font-size: 0.75rem; border-bottom-left-radius: 8px; font-weight: bold; z-index: 10;">
+                                <i class="fa fa-tag me-1"/> <field name="x_studio_origen_cita"/>
+                            </div>
+                            <!-- Badge de urgencia -->
+                            <div t-if="record.urgencia_cita.raw_value == 'tarde'"
+                                 class="ps-urgencia-badge ps-urgencia-badge-tarde">
+                                <i class="fa fa-clock-o"/> TARDE
+                            </div>
+                            <div t-if="record.urgencia_cita.raw_value == 'ahora'"
+                                 class="ps-urgencia-badge ps-urgencia-badge-ahora">
+                                <i class="fa fa-bolt"/> AHORA
+                            </div>
+                            <div t-if="record.urgencia_cita.raw_value == 'proxima'"
+                                 class="ps-urgencia-badge ps-urgencia-badge-proxima">
+                                <i class="fa fa-clock-o"/> PROXIMA
+                            </div>
+                            <div class="row align-items-center">
+                                <div class="col-8">
+                                    <strong class="o_kanban_record_title fs-5"><field name="manual_customer_id"/></strong>
+                                    <div class="text-primary mt-1"><i class="fa fa-clock-o" title="Hora"/> <field name="start"/></div>
+                                    <div class="text-muted"><field name="appointment_type_id"/></div>
+                                    <div class="text-muted small mt-1"><i class="fa fa-user-circle" title="Artista"/> <field name="real_employee_id"/></div>
+                                    <div class="text-danger mt-1 small fw-bold" invisible="not alergias_cliente">
+                                        <i class="fa fa-warning"/> Alergias: <field name="alergias_cliente"/>
+                                    </div>
+                                    <div class="mt-2">
+                                        <field name="appointment_status" widget="badge"
+                                               decoration-success="appointment_status == 'concluded'"
+                                               decoration-warning="appointment_status == 'attended'"
+                                               decoration-info="appointment_status == 'booked'"
+                                               decoration-danger="appointment_status == 'cancelled'"/>
+                                        <span class="ms-2">
+                                            <i class="fa fa-folder-open ps-expediente-icon" title="Expediente"/> <field name="expediente_completado" widget="boolean" readonly="1"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <button name="action_iniciar_cita" type="object" class="btn btn-primary d-block w-100 rounded-pill mb-2 ps-btn-kanban" invisible="appointment_status != 'booked'" groups="beauty_salon_file_management.group_popstudio_artista">
+                                        <i class="fa fa-play"/> Iniciar
+                                    </button>
+                                    <button name="action_concluir_cita" type="object" class="btn btn-success d-block w-100 rounded-pill ps-btn-kanban" invisible="appointment_status != 'attended'" groups="beauty_salon_file_management.group_popstudio_artista">
+                                        <i class="fa fa-check"/> Concluir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ── VISTA BÚSQUEDA ───────────────────────────────────────────────── -->
+    <record id="view_calendar_event_popstudio_search" model="ir.ui.view">
+        <field name="name">calendar.event.file.mgmt.search</field>
+        <field name="model">calendar.event</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Citas">
+                <field name="manual_customer_id" string="Clienta"/>
+                <field name="real_employee_id" string="Artista"/>
+                <field name="name" string="Nombre de Cita"/>
+                <separator/>
+                <filter string="Reservadas" name="booked"
+                        domain="[('appointment_status', '=', 'booked')]"/>
+                <filter string="En Curso" name="attended"
+                        domain="[('appointment_status', '=', 'attended')]"/>
+                <filter string="Concluidas" name="concluded"
+                        domain="[('appointment_status', '=', 'concluded')]"/>
+                <separator/>
+                <filter string="Expediente OK" name="expediente_ok"
+                        domain="[('expediente_completado', '=', True)]"/>
+                <filter string="Expediente Faltante" name="expediente_faltante"
+                        domain="[('appointment_status', '=', 'concluded'), ('expediente_completado', '=', False)]"/>
+                <separator/>
+                <filter string="Hoy" name="hoy"
+                        domain="[('start', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+                                  ('start', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+                <filter string="Esta Semana" name="semana"
+                        domain="[('start', '&gt;=', (context_today() - relativedelta(weeks=1)).strftime('%Y-%m-%d'))]"/>
+                <group expand="1" string="Agrupar Por">
+                    <filter string="Artista" name="group_artista"
+                            context="{'group_by': 'real_employee_id'}"/>
+                    <filter string="Estado" name="group_estado"
+                            context="{'group_by': 'appointment_status'}"/>
+                    <filter string="Semana" name="group_semana"
+                            context="{'group_by': 'start:week'}"/>
+                    <filter string="Mes" name="group_mes"
+                            context="{'group_by': 'start:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── ACCIÓN PARA CITAS CON EXPEDIENTES ─────────────────────────────── -->
+    <record id="action_citas_popstudio" model="ir.actions.act_window">
+        <field name="name">Citas - Expedientes</field>
+        <field name="res_model">calendar.event</field>
+        <field name="view_mode">kanban,list,form,calendar</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_calendar_event_popstudio_kanban')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_calendar_event_popstudio_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_calendar_event_popstudio_form')}),
+        ]"/>
+        <field name="search_view_id" ref="view_calendar_event_popstudio_search"/>
+        <field name="context">{
+            'search_default_hoy': 1,
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Sin citas registradas para hoy
+            </p>
+        </field>
+    </record>
+
+</odoo>

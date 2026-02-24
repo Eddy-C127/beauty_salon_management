@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+        Oculta el botón "Sign Up / Registrarse" en la pantalla de confirmación
+        de pedido (/shop/confirmation) cuando la modalidad de agendamiento
+        público está activa.
+
+        El bloque original en website_sale.confirmation (línea ~2957):
+            <t t-if="...scope == 'b2c' and request.website.is_public_user()">
+                <p class="alert alert-info mt-3">
+                    <a ... class="btn btn-primary">Sign Up</a>
+                    to follow your order.
+                </p>
+            </t>
+
+        Agregamos una condición extra para suprimirlo en modalidad pública.
+    -->
+    <template id="salon_hide_signup_confirmation"
+              name="Salon: Ocultar Sign Up en confirmación"
+              inherit_id="website_sale.confirmation">
+
+        <xpath expr="//t[@t-if=&quot;request.env['res.users']._get_signup_invitation_scope() == 'b2c' and request.website.is_public_user()&quot;]"
+               position="replace">
+            <t t-if="request.env['res.users']._get_signup_invitation_scope() == 'b2c'
+                     and request.website.is_public_user()
+                     and request.env['ir.config_parameter'].sudo().get_param('salon_customer_unifier.public_booking_mode') != 'True'">
+                <p class="alert alert-info mt-3" role="status">
+                    <a role="button"
+                       t-att-href="order.partner_id.signup_prepare() and order.partner_id.with_context(relative_url=True)._get_signup_url()"
+                       class="btn btn-primary">Sign Up</a>
+                    to follow your order.
+                </p>
+            </t>
+        </xpath>
+
+    </template>
+
+</odoo>

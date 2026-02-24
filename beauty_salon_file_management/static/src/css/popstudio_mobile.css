@@ -1,0 +1,815 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   POP STUDIO EXPEDIENTE - MOBILE-FIRST CSS
+   Autor: Smartgeeks (smartgeeks.mx)
+   Versión: 18.0.1.1.0
+   
+   Diseño Mobile-First:
+   - Botones sticky/FAB en móvil
+   - Bottom Sheet modals (slide-up)
+   - Tema rosa/púrpura de marca Pop Studio
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* ══ VARIABLES DE MARCA ══════════════════════════════════════════════════ */
+:root {
+    --ps-primary: #e91e8c;
+    --ps-primary-dark: #c4157a;
+    --ps-primary-light: #f48cbf;
+    --ps-secondary: #9c27b0;
+    --ps-secondary-light: #ce93d8;
+    --ps-accent: #ff4081;
+    --ps-success: #00c853;
+    --ps-danger: #f44336;
+    --ps-warning: #ff9800;
+    --ps-dark: #1a1a2e;
+    --ps-surface: #ffffff;
+    --ps-surface-alt: #fce4ec;
+    --ps-border-radius: 16px;
+    --ps-border-radius-sm: 8px;
+    --ps-shadow: 0 4px 20px rgba(233, 30, 140, 0.15);
+    --ps-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.2);
+    --ps-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ══ FORMULARIO PRINCIPAL ════════════════════════════════════════════════ */
+.popstudio-form .oe_title h1 {
+    color: var(--ps-primary);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--ps-primary), var(--ps-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ══ ALERTAS MÉDICAS ══════════════════════════════════════════════════════ */
+.ps-alert-alergias,
+.ps-alerta-medica {
+    border: 2px solid var(--ps-danger);
+    border-radius: var(--ps-border-radius-sm);
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
+    animation: ps-pulse-danger 2s infinite;
+}
+
+@keyframes ps-pulse-danger {
+
+    0%,
+    100% {
+        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 4px 16px rgba(244, 67, 54, 0.5);
+    }
+}
+
+.ps-alerta-medica-container {
+    margin-bottom: 1rem;
+}
+
+.ps-alerta-text {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #c62828 !important;
+}
+
+/* ══ ZONA DE ALERGIAS EN EL PARTNER ══════════════════════════════════════ */
+.ps-alergias-container {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border: 2px dashed var(--ps-warning);
+    border-radius: var(--ps-border-radius);
+    padding: 1rem;
+    margin: 1rem 0;
+    position: relative;
+}
+
+.ps-alergias-header {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #e65100;
+    margin-bottom: 0.5rem;
+}
+
+.ps-alergias-field textarea {
+    background: transparent !important;
+    border: none !important;
+    color: #bf360c;
+    font-weight: 600;
+}
+
+/* ══ GRID DE FOTOS ═══════════════════════════════════════════════════════ */
+.ps-foto-grid {
+    gap: 1rem;
+}
+
+.ps-foto-col {
+    padding: 0.5rem;
+}
+
+.ps-foto-card {
+    border: 2px solid #e0e0e0;
+    border-radius: var(--ps-border-radius);
+    padding: 1rem;
+    background: #fafafa;
+    text-align: center;
+    transition: var(--ps-transition);
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ps-foto-card:hover {
+    border-color: var(--ps-primary-light);
+    box-shadow: var(--ps-shadow);
+    transform: translateY(-2px);
+}
+
+.ps-foto-label {
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+    color: #616161;
+}
+
+.ps-foto-before .ps-foto-label {
+    color: #1565c0;
+}
+
+.ps-foto-after .ps-foto-label {
+    color: var(--ps-success);
+}
+
+/* ══ FIRMA DIGITAL ═══════════════════════════════════════════════════════ */
+.ps-firma-display {
+    max-width: 400px;
+    margin: 0 auto;
+    border: 1px solid #bdbdbd;
+    border-radius: var(--ps-border-radius-sm);
+    padding: 0.5rem;
+    background: #f5f5f5;
+}
+
+.ps-firma-container {
+    background: white;
+    border: 2px solid var(--ps-secondary-light);
+    border-radius: var(--ps-border-radius);
+    padding: 1rem;
+    margin: 0.5rem 0;
+}
+
+.ps-firma-label {
+    font-weight: 600;
+    color: var(--ps-secondary);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.ps-firma-field {
+    min-height: 150px;
+}
+
+/* ══ PESTAÑA EXPEDIENTE EN PARTNER ═══════════════════════════════════════ */
+.ps-expediente-tab {
+    background: linear-gradient(180deg, #fce4ec 0%, white 100px);
+}
+
+.ps-privacy-badge {
+    border-radius: var(--ps-border-radius);
+    border-left: 4px solid currentColor;
+}
+
+/* ══ WIZARD ESTILOS ═══════════════════════════════════════════════════════ */
+.ps-wizard .modal-dialog {
+    transition: var(--ps-transition) !important;
+}
+
+.ps-wizard-header {
+    text-align: center;
+    padding: 1.5rem 1rem 1rem;
+    background: linear-gradient(135deg, var(--ps-primary), var(--ps-secondary));
+    border-radius: var(--ps-border-radius) var(--ps-border-radius) 0 0;
+    margin: -1rem -1rem 1.5rem;
+    color: white;
+}
+
+.ps-wizard-header-success {
+    background: linear-gradient(135deg, #00c853, #1b5e20) !important;
+}
+
+.ps-wizard-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.ps-wizard-title {
+    color: white !important;
+    font-weight: 700;
+    margin: 0;
+}
+
+.ps-wizard-subtitle {
+    color: rgba(255, 255, 255, 0.85) !important;
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+}
+
+/* ── Foto Upload en Wizard ─────────────────────────────────────────────── */
+.ps-foto-upload-container {
+    padding: 1rem;
+    background: #f5f5f5;
+    border-radius: var(--ps-border-radius);
+    text-align: center;
+}
+
+.ps-foto-prompt {
+    color: #616161;
+}
+
+.ps-foto-upload-field {
+    cursor: pointer;
+}
+
+.ps-foto-required {
+    border: 2px solid var(--ps-danger) !important;
+}
+
+/* ── Audit Alerts ──────────────────────────────────────────────────────── */
+.ps-audit-alert,
+.ps-audit-success,
+.ps-audit-warning {
+    border-radius: var(--ps-border-radius-sm);
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* ── Botones de acción en cita ────────────────────────────────────────── */
+.ps-btn-iniciar {
+    background: linear-gradient(135deg, var(--ps-primary), var(--ps-secondary)) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(233, 30, 140, 0.4) !important;
+    transition: var(--ps-transition) !important;
+}
+
+.ps-btn-iniciar:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(233, 30, 140, 0.6) !important;
+}
+
+.ps-btn-concluir {
+    background: linear-gradient(135deg, #00c853, #1b5e20) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(0, 200, 83, 0.4) !important;
+    transition: var(--ps-transition) !important;
+}
+
+.ps-btn-concluir:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(0, 200, 83, 0.6) !important;
+}
+
+/* ── Botón de confirmación en wizard ──────────────────────────────────── */
+.ps-btn-confirm {
+    letter-spacing: 0.05em;
+    font-weight: 700 !important;
+    border-radius: var(--ps-border-radius) !important;
+    padding: 1.25rem !important;
+    font-size: 1.15rem !important;
+}
+
+/* ── Checkbox de confirmación final ──────────────────────────────────── */
+.ps-confirm-final {
+    border: 2px solid #e0e0e0;
+    border-radius: var(--ps-border-radius);
+    transition: var(--ps-transition);
+}
+
+.ps-confirm-final:has(input:checked) {
+    border-color: var(--ps-success);
+    background: #e8f5e9 !important;
+}
+
+/* ══ KANBAN ════════════════════════════════════════════════════════════════ */
+.ps-kanban-card {
+    border-radius: var(--ps-border-radius) !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    transition: var(--ps-transition) !important;
+    overflow: hidden;
+}
+
+.ps-kanban-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: var(--ps-shadow-lg) !important;
+}
+
+.ps-kanban-thumb {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+}
+
+.ps-kanban-no-foto {
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+}
+
+.ps-kanban-body {
+    padding: 0.75rem;
+}
+
+/* ══ RESPONSIVE MOBILE-FIRST ════════════════════════════════════════════ */
+
+/* Móvil: Pantallas menores a 768px */
+@media (max-width: 767.98px) {
+
+    /* ── Bottom Sheet: Wizards como panel deslizable ──────────────── */
+    .o_dialog .modal-dialog {
+        margin: 0 !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 92vh !important;
+        animation: ps-slide-up 0.35s cubic-bezier(0.32, 0.72, 0, 1) !important;
+    }
+
+    .o_dialog .modal-content {
+        border-radius: 24px 24px 0 0 !important;
+        border: none !important;
+        overflow: hidden;
+        overflow-y: auto;
+        max-height: 92vh;
+    }
+
+    /* Handle draggable (barra superior) */
+    .o_dialog .modal-header::before {
+        content: '';
+        display: block;
+        width: 48px;
+        height: 5px;
+        background: #e0e0e0;
+        border-radius: 3px;
+        margin: -0.5rem auto 0.75rem;
+    }
+
+    @keyframes ps-slide-up {
+        from {
+            transform: translateY(100%);
+            opacity: 0.5;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* ── Botones FAB móvil (div dentro del sheet) ────────────── */
+    .ps-mobile-fab {
+        position: fixed !important;
+        bottom: 1rem !important;
+        left: 1rem !important;
+        right: 1rem !important;
+        z-index: 1050 !important;
+        display: flex !important;
+        gap: 0.5rem;
+    }
+
+    .ps-fab-iniciar,
+    .ps-fab-concluir {
+        flex: 1 !important;
+        padding: 1rem !important;
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
+        border-radius: 50px !important;
+        min-height: 56px !important;
+        text-align: center !important;
+        border: none !important;
+        color: white !important;
+    }
+
+    .ps-fab-iniciar {
+        background: linear-gradient(135deg, var(--ps-primary), var(--ps-secondary)) !important;
+        box-shadow: 0 4px 20px rgba(233, 30, 140, 0.5) !important;
+    }
+
+    .ps-fab-concluir {
+        background: linear-gradient(135deg, #00c853, #1b5e20) !important;
+        box-shadow: 0 4px 20px rgba(0, 200, 83, 0.5) !important;
+    }
+
+    /* Espacio inferior para que el FAB no tape contenido */
+    .o_form_view .o_form_sheet_bg {
+        padding-bottom: 5rem !important;
+    }
+
+    /* ── Fotos: Una por fila en móvil ─────────────────────────────── */
+    .ps-foto-grid .col-md-6 {
+        margin-bottom: 1rem;
+    }
+
+    .ps-foto-card {
+        min-height: 200px;
+    }
+
+    /* ── Wizard: Full width ───────────────────────────────────────── */
+    .ps-wizard-header {
+        padding: 1rem 1rem 0.75rem;
+        margin: -0.5rem -0.5rem 1rem;
+    }
+
+    .ps-wizard-icon {
+        font-size: 2rem;
+    }
+
+    .ps-wizard-title {
+        font-size: 1.25rem !important;
+    }
+
+    /* ── Notebook pills: Scroll horizontal en móvil ─────────────── */
+    .ps-wizard-notebook .nav-tabs,
+    .ps-wizard-notebook .nav-pills {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        padding-bottom: 0.25rem;
+    }
+
+    .ps-wizard-notebook .nav-tabs::-webkit-scrollbar,
+    .ps-wizard-notebook .nav-pills::-webkit-scrollbar {
+        display: none;
+    }
+
+    .ps-wizard-notebook .nav-item {
+        flex-shrink: 0 !important;
+    }
+
+    /* ── Footer wizard sticky ─────────────────────────────────────── */
+    .ps-wizard-footer {
+        position: sticky !important;
+        bottom: 0 !important;
+        background: white !important;
+        padding: 0.75rem !important;
+        border-top: 1px solid #e0e0e0 !important;
+        z-index: 10 !important;
+    }
+
+    /* ── Chatter: Colapsado por defecto en móvil ──────────────────── */
+    .o_chatter {
+        display: none;
+    }
+
+    .o_chatter.o_is_mobile_open {
+        display: block;
+    }
+
+}
+
+/* Tablet: 768px - 1024px */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .o_dialog .modal-dialog {
+        max-width: 90vw;
+        min-width: 600px;
+    }
+
+    .ps-foto-card {
+        min-height: 250px;
+    }
+}
+
+/* Escritorio: > 1024px */
+@media (min-width: 1025px) {
+    .o_dialog .modal-dialog {
+        min-width: 680px;
+    }
+}
+
+/* ══ ANIMACIONES GENERALES ════════════════════════════════════════════════ */
+
+/* Pulsación en alertas importantes */
+.ps-pulse-warning {
+    animation: ps-pulse-warning 2s infinite;
+}
+
+@keyframes ps-pulse-warning {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Entrada de tarjetas */
+.ps-kanban-card,
+.ps-foto-card {
+    animation: ps-fade-in 0.3s ease;
+}
+
+@keyframes ps-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ══ ESTILOS LISTA CON DECORADORES DE AUDITORÍA ════════════════════════ */
+
+/* Verde: Cita concluida + expediente completo */
+.o_list_table tr.o_row_highlight.text-success td {
+    background: rgba(0, 200, 83, 0.06) !important;
+}
+
+/* Rojo: Cita concluida SIN expediente */
+.o_list_table tr.text-danger td {
+    background: rgba(244, 67, 54, 0.06) !important;
+}
+
+/* Naranja: Cita en curso */
+.o_list_table tr.text-warning td {
+    background: rgba(255, 152, 0, 0.06) !important;
+}
+
+/* ══ BADGE DE ESTADO CUSTOM ═══════════════════════════════════════════════ */
+.badge.badge_popstudio_pendiente {
+    background: #e0e0e0;
+    color: #616161;
+}
+
+.badge.badge_popstudio_en_curso {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: white;
+    animation: ps-pulse-warning 1.5s infinite;
+}
+
+.badge.badge_popstudio_concluida {
+    background: linear-gradient(135deg, #00c853, #1b5e20);
+    color: white;
+}
+
+.badge.badge_popstudio_cancelada {
+    background: linear-gradient(135deg, #f44336, #b71c1c);
+    color: white;
+}
+
+/* ══ FOTO UPLOAD MEJORADO ═══════════════════════════════════════════════ */
+
+/* Contener imágenes dentro de su área */
+.ps-foto-upload-container .o_field_widget img,
+.ps-foto-card .o_field_widget img {
+    max-width: 100% !important;
+    max-height: 400px !important;
+    object-fit: contain !important;
+    border-radius: var(--ps-border-radius-sm);
+}
+
+/* many2many_binary: hacer el área de drop/upload más visible */
+.ps-foto-upload-container .o_field_many2many_binary .o_attach {
+    min-height: 120px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 3px dashed var(--ps-primary-light) !important;
+    border-radius: var(--ps-border-radius) !important;
+    background: var(--ps-surface-alt) !important;
+    cursor: pointer !important;
+    transition: var(--ps-transition);
+    padding: 1rem !important;
+}
+
+.ps-foto-upload-container .o_field_many2many_binary .o_attach:hover {
+    border-color: var(--ps-primary) !important;
+    background: #fce4ec !important;
+}
+
+/* Thumbnails de archivos subidos */
+.ps-foto-upload-container .o_field_many2many_binary .o_attachments,
+.ps-foto-card .o_field_many2many_binary .o_attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.ps-foto-upload-container .o_field_many2many_binary .o_attachment,
+.ps-foto-card .o_field_many2many_binary .o_attachment {
+    border-radius: var(--ps-border-radius-sm);
+    overflow: hidden;
+    border: 2px solid #e0e0e0;
+    transition: var(--ps-transition);
+}
+
+.ps-foto-upload-container .o_field_many2many_binary .o_attachment:hover,
+.ps-foto-card .o_field_many2many_binary .o_attachment:hover {
+    border-color: var(--ps-primary);
+    transform: scale(1.02);
+}
+
+.ps-foto-required .o_field_many2many_binary .o_attach {
+    border-color: var(--ps-danger) !important;
+}
+
+@media (max-width: 767.98px) {
+    .ps-foto-upload-container .o_field_many2many_binary .o_attach {
+        min-height: 100px !important;
+    }
+
+    .ps-foto-card .o_field_widget img {
+        max-height: 250px !important;
+    }
+}
+
+/* ══ FOTO LIGHTBOX (visualizador de fotos) ══════════════════════════════ */
+.ps-lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: ps-fade-in 0.2s ease;
+    cursor: pointer;
+}
+
+.ps-lightbox-content {
+    position: relative;
+    max-width: 95vw;
+    max-height: 95vh;
+}
+
+.ps-lightbox-content img {
+    max-width: 95vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+.ps-lightbox-close {
+    position: absolute;
+    top: -48px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.ps-lightbox-close:hover {
+    opacity: 1;
+}
+
+/* Fotos clickeables en modo readonly */
+.ps-foto-card .o_field_many2many_binary .o_attachment img {
+    cursor: pointer;
+}
+
+/* ══ KANBAN CITAS (mobile-first) ════════════════════════════════════════ */
+.ps-kanban-cita-card {
+    border-left: 4px solid var(--ps-primary) !important;
+}
+
+.ps-btn-kanban {
+    min-height: 40px !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+}
+
+.o_kanban_mobile .o_kanban_record {
+    border-radius: var(--ps-border-radius) !important;
+    margin-bottom: 0.5rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    border: none !important;
+}
+
+.o_kanban_mobile .o_kanban_record:hover {
+    box-shadow: var(--ps-shadow) !important;
+}
+
+.ps-expediente-icon {
+    color: var(--ps-primary);
+}
+
+/* ══ URGENCIA DE CITAS — Estilos neón para kanban ══════════════════════ */
+
+/* Badge de urgencia (esquina superior) */
+.ps-urgencia-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.ps-urgencia-badge-ahora {
+    background: #ff0040;
+    color: white;
+    animation: ps-badge-pulse 1.5s infinite;
+}
+
+.ps-urgencia-badge-proxima {
+    background: #ff9800;
+    color: white;
+}
+
+/* ── AHORA: Contorno rojo neón pulsante ── */
+.ps-urgencia-ahora {
+    border: 2px solid #ff0040 !important;
+    border-left-width: 5px !important;
+    animation: ps-neon-border-red 2s ease-in-out infinite !important;
+}
+
+/* ── PRÓXIMA: Contorno naranja ── */
+.ps-urgencia-proxima {
+    border: 2px solid #ff9800 !important;
+    border-left-width: 5px !important;
+}
+
+/* ── Animaciones neón (solo borde) ── */
+@keyframes ps-neon-border-red {
+
+    0%,
+    100% {
+        border-color: #ff0040;
+        box-shadow: 0 0 8px rgba(255, 0, 64, 0.3);
+    }
+
+    50% {
+        border-color: #ff4070;
+        box-shadow: 0 0 16px rgba(255, 0, 64, 0.5);
+    }
+}
+
+@keyframes ps-badge-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.85;
+        transform: scale(1.05);
+    }
+}
+
+.ps-urgencia-badge-tarde {
+    background: #9c27b0;
+    color: white;
+    animation: ps-badge-pulse 1.5s infinite;
+}
+
+/* ── TARDE: Contorno lila pulsante ── */
+.ps-urgencia-tarde {
+    border: 2px solid #9c27b0 !important;
+    border-left-width: 5px !important;
+    animation: ps-neon-border-purple 2s ease-in-out infinite !important;
+}
+
+@keyframes ps-neon-border-purple {
+
+    0%,
+    100% {
+        border-color: #9c27b0;
+        box-shadow: 0 0 8px rgba(156, 39, 176, 0.3);
+    }
+
+    50% {
+        border-color: #ce93d8;
+        box-shadow: 0 0 16px rgba(156, 39, 176, 0.5);
+    }
+}

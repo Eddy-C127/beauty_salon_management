@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_salon_push" model="ir.ui.view">
+        <field name="name">res.config.settings.view.salon.push</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Push Notifications Citas" string="Push Notifications Citas" name="salon_push_notifications" logo="/web/static/img/favicon.ico">
+                    <block title="Citas" name="salon_push_block">
+                        <setting id="salon_push_enabled_setting" string="Notificaciones push de citas">
+                            <field name="salon_push_notif_enabled"/>
+                            <div class="text-muted">
+                                Enviar push notifications de confirmación y recordatorio al cliente que reserva
+                            </div>
+                        </setting>
+                        <setting id="salon_push_reminder_hours_setting" string="Horas de recordatorio (fallback)">
+                            <field name="salon_push_notif_reminder_hours"/>
+                            <div class="text-muted">
+                                Horas antes de la cita para el recordatorio. Solo se usa si el Tipo de Cita no tiene recordatorios configurados.
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         WIZARD: Concluir Cita - Mobile-First
+         Foto Después OBLIGATORIA + Notas + Validación Auditoría
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="view_wizard_concluir_cita_form" model="ir.ui.view">
+        <field name="name">popstudio.wizard.concluir.cita.form</field>
+        <field name="model">popstudio.wizard.concluir.cita</field>
+        <field name="arch" type="xml">
+            <form string="✅ Concluir Cita" class="ps-wizard ps-wizard-concluir">
+
+                <sheet>
+
+                    <!-- Encabezado -->
+                    <div class="ps-wizard-header ps-wizard-header-success">
+                        <div class="ps-wizard-icon">✅</div>
+                        <h2 class="ps-wizard-title">Concluir Cita</h2>
+                        <p class="ps-wizard-subtitle text-muted">
+                            <field name="partner_id" readonly="1" nolabel="1" class="fw-bold"/>
+                        </p>
+                    </div>
+
+                    <!-- Aviso de auditoría -->
+                    <div class="alert alert-warning ps-audit-warning">
+                        <i class="fa fa-info-circle"/>
+                        <strong> Auditoría de Comisiones:</strong>
+                        La <strong>Foto Después</strong> y las <strong>Notas</strong>
+                        son obligatorias para validar el expediente y calcular tu comisión.
+                    </div>
+
+                    <!-- Pestañas -->
+                    <notebook class="ps-wizard-notebook">
+
+                        <!-- ── PASO 1: Foto Después (OBLIGATORIA) ───── -->
+                        <page string="📸 Foto Final" name="foto_despues_tab"
+                              class="ps-tab-foto">
+                            <div class="ps-foto-upload-container">
+                                <div class="ps-foto-prompt text-center mb-3">
+                                    <i class="fa fa-camera fa-3x text-success"/>
+                                    <p class="mt-2 fw-bold">
+                                        Captura la Foto DESPUÉS del Servicio
+                                    </p>
+                                    <div class="badge bg-danger text-white p-2 mb-2">
+                                        ⚠️ OBLIGATORIA para validar comisión
+                                    </div>
+                                    <small class="text-muted d-block">
+                                        Muestra el resultado final del servicio.
+                                        Usa buena iluminación y el mismo ángulo que la foto inicial.
+                                    </small>
+                                </div>
+                                <field name="foto_despues_ids"
+                                       widget="many2many_binary"
+                                       class="ps-foto-upload-field ps-foto-required"
+                                       nolabel="1"/>
+                            </div>
+                        </page>
+
+                        <!-- ── PASO 2: Notas (OBLIGATORIAS) ─────────── -->
+                        <page string="📝 Notas" name="notas_tab"
+                              class="ps-tab-notas">
+                            <group>
+                                <field name="nivel_satisfaccion"
+                                       widget="priority"
+                                       string="Satisfacción de la Clienta"/>
+                                <field name="comentario_cliente"
+                                       placeholder="¿Qué dijo la clienta sobre el resultado?"/>
+                            </group>
+
+                            <label for="notas_sesion" string="📝 Notas de la Sesión *"/>
+                            <div class="text-muted small mb-1">
+                                Describe el trabajo: técnica, mezclas, tiempos, detalles relevantes.
+                            </div>
+                            <field name="notas_sesion"
+                                   widget="html"
+                                   nolabel="1"
+                                   placeholder="Ej: Se aplicó tinte 7.1 con oxidante 20 vol durante 35 min. Se realizó hidratación con mascarilla Kerastase. Cliente toleró bien el proceso..."
+                                   style="min-height: 120px;"
+                                   required="1"/>
+
+                            <group class="mt-2">
+                                <field name="productos_usados"
+                                       placeholder="Ej: Tinte L'Oreal 7.1, Oxidante 20 vol, Mascarilla Fusio Dose..."/>
+                                <field name="reacciones_adversas"
+                                       placeholder="Si no hubo reacciones adversas, dejar en blanco"/>
+                            </group>
+                        </page>
+
+                        <!-- ── PASO 3: Recomendaciones ────────────── -->
+                        <page string="💡 Cuidados" name="cuidados_tab"
+                              class="ps-tab-cuidados">
+                            <div class="ps-cuidados-header mb-2">
+                                <p class="text-muted">
+                                    Instrucciones de cuidado post-tratamiento para la clienta.
+                                </p>
+                            </div>
+                            <field name="recomendaciones_cuidado"
+                                   widget="html"
+                                   nolabel="1"
+                                   placeholder="Ej: Evitar lavado de cabello 48 hrs. Usar shampoo sin sulfatos. Evitar exposición solar directa. Próxima visita recomendada en 4 semanas..."
+                                   style="min-height: 140px;"/>
+                        </page>
+
+                    </notebook>
+
+                    <!-- Confirmación final -->
+                    <div class="ps-confirm-final mt-3 p-3 bg-light rounded">
+                        <field name="confirmar_cierre"
+                               widget="boolean_toggle"
+                               class="me-2"/>
+                        <span class="small fw-bold">
+                            Confirmo que el servicio ha concluido correctamente
+                            y que la información registrada es verídica.
+                            Entiendo que este registro es vinculante para
+                            el cálculo de mi comisión.
+                        </span>
+                    </div>
+
+                </sheet>
+
+                <!-- Footer con botones -->
+                <footer class="ps-wizard-footer">
+                    <button name="action_confirmar_conclusion"
+                            string="✅ Confirmar Conclusión"
+                            type="object"
+                            class="btn-success btn-lg ps-btn-confirm w-100"/>
+                    <button string="Cancelar"
+                            special="cancel"
+                            class="btn-secondary"/>
+                </footer>
+
+            </form>
+        </field>
+    </record>
+
+</odoo>

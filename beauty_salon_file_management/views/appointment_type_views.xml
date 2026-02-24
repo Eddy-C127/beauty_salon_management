@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         EXTENSIÓN: appointment.type
+         Agrega el campo "Nivel de Expediente Requerido" al formulario
+         de tipo de cita para que el manager pueda configurarlo.
+    ═══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_appointment_type_form_inherit_expediente" model="ir.ui.view">
+        <field name="name">appointment.type.form.inherit.expediente</field>
+        <field name="model">appointment.type</field>
+        <field name="inherit_id" ref="appointment.appointment_type_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Inyectar el campo después del nombre del tipo de cita -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="nivel_expediente_requerido"
+                       widget="radio"
+                       options="{'horizontal': true}"
+                       string="Nivel de Expediente Requerido"
+                       help="Define qué información clínica debe tener la clienta antes de iniciar este servicio."/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

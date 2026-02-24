@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ═══════════════════════════════════════════
+             CATEGORÍA DE MÓDULO
+        ═══════════════════════════════════════════ -->
+        <record id="module_category_popstudio" model="ir.module.category">
+            <field name="name">Pop Studio</field>
+            <field name="description">Módulos para la gestión de Pop Studio Beauty</field>
+            <field name="sequence">100</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════
+             GRUPOS DE SEGURIDAD
+        ═══════════════════════════════════════════ -->
+
+        <!-- Recepcionista: Puede ver citas y expedientes básicos -->
+        <record id="group_popstudio_recepcionista" model="res.groups">
+            <field name="name">Recepcionista</field>
+            <field name="category_id" ref="module_category_popstudio"/>
+            <field name="comment">Puede ver y crear citas. Acceso básico a expedientes.</field>
+        </record>
+
+        <!-- Artista: Puede gestionar sus propias citas y expedientes -->
+        <record id="group_popstudio_artista" model="res.groups">
+            <field name="name">Artista / Estilista</field>
+            <field name="category_id" ref="module_category_popstudio"/>
+            <field name="implied_ids" eval="[(4, ref('group_popstudio_recepcionista'))]"/>
+            <field name="comment">Puede iniciar/concluir citas y gestionar expedientes de sus clientas.</field>
+        </record>
+
+        <!-- Manager: Acceso completo incluyendo auditoría y reportes -->
+        <record id="group_popstudio_manager" model="res.groups">
+            <field name="name">Manager / Coordinador</field>
+            <field name="category_id" ref="module_category_popstudio"/>
+            <field name="implied_ids" eval="[(4, ref('group_popstudio_artista'))]"/>
+            <field name="comment">Acceso completo: auditoría, reportes, comisiones y configuración.</field>
+            <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         WIZARD: Iniciar Cita - Mobile-First
+         Bottom Sheet en móvil, Modal estándar en escritorio
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="view_wizard_iniciar_cita_form" model="ir.ui.view">
+        <field name="name">popstudio.wizard.iniciar.cita.form</field>
+        <field name="model">popstudio.wizard.iniciar.cita</field>
+        <field name="arch" type="xml">
+            <form string="🚀 Iniciar Cita" class="ps-wizard ps-wizard-iniciar">
+
+                <sheet>
+
+                    <!-- Encabezado del wizard -->
+                    <div class="ps-wizard-header">
+                        <div class="ps-wizard-icon">🚀</div>
+                        <h2 class="ps-wizard-title">Iniciar Cita</h2>
+                        <p class="ps-wizard-subtitle text-muted">
+                            <field name="partner_id" readonly="1" nolabel="1"
+                                   class="fw-bold"/> —
+                            <field name="servicio_nombre" readonly="1" nolabel="1"/>
+                        </p>
+                    </div>
+
+                    <!-- SECCIÓN 1: Alertas Médicas (si existen) -->
+                    <div class="ps-alerta-medica-container"
+                         invisible="not tiene_alertas_medicas">
+                        <div class="alert alert-danger ps-alerta-medica">
+                            <h5 class="alert-heading">
+                                <i class="fa fa-exclamation-triangle fa-pulse"/>
+                                ⚠️ ALERTAS MÉDICAS — Leer antes de iniciar
+                            </h5>
+                            <div invisible="not alergias_display">
+                                <strong>🚫 Alergias:</strong>
+                                <field name="alergias_display" readonly="1" nolabel="1"
+                                       class="ps-alerta-text"/>
+                            </div>
+                            <div invisible="not condiciones_medicas_display">
+                                <strong>🩺 Condiciones:</strong>
+                                <field name="condiciones_medicas_display" readonly="1" nolabel="1"
+                                       class="ps-alerta-text"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Indicador de privacidad -->
+                    <div class="alert alert-warning" invisible="aviso_privacidad_ok">
+                        <i class="fa fa-exclamation-circle"/>
+                        <strong> Aviso de Privacidad pendiente.</strong>
+                        Al iniciar la cita, se registrará la aceptación.
+                    </div>
+
+                    <!-- Pestañas con Pills para navegación móvil -->
+                    <notebook class="ps-wizard-notebook">
+
+                        <!-- ── PASO 1: Foto Antes ──────────────────── -->
+                        <page string="📸 Foto Inicial" name="foto_antes_tab"
+                              class="ps-tab-foto">
+                            <div class="ps-foto-upload-container">
+                                <div class="ps-foto-prompt text-center mb-3">
+                                    <i class="fa fa-camera fa-3x text-primary"/>
+                                    <p class="mt-2 fw-bold">Captura la Foto ANTES del Servicio</p>
+                                    <small class="text-muted">
+                                        En móvil, toca para abrir la cámara directamente.
+                                        Asegúrate de buena iluminación.
+                                    </small>
+                                </div>
+                                <field name="foto_antes_ids"
+                                       widget="many2many_binary"
+                                       class="ps-foto-upload-field"
+                                       nolabel="1"/>
+                            </div>
+                        </page>
+
+                        <!-- ── PASO 2: Consentimiento ──────────────── -->
+                        <page string="✍️ Firma" name="consentimiento_tab"
+                              class="ps-tab-firma">
+
+                            <!-- Texto del consentimiento -->
+                            <div class="ps-consentimiento-text">
+                                <h6 class="fw-bold">Consentimiento Informado</h6>
+                                <p class="text-muted small">
+                                    La clienta declara que ha sido informada sobre el
+                                    procedimiento, los productos a utilizar y los posibles
+                                    riesgos. Autoriza a <strong>Pop Studio</strong> a tratar
+                                    sus datos personales y de salud conforme al
+                                    <strong>Aviso de Privacidad</strong> disponible en
+                                    las instalaciones, de acuerdo con la
+                                    <em>LFPDPPP (Ley Federal de Protección de Datos
+                                    Personales en Posesión de los Particulares)</em>.
+                                </p>
+                            </div>
+
+                            <!-- Campo de firma digital -->
+                            <div class="ps-firma-container">
+                                <span class="o_form_label ps-firma-label">
+                                    <i class="fa fa-pen" title="Firma"/> Firma de la Clienta:
+                                </span>
+                                <field name="firma_consentimiento"
+                                       widget="signature"
+                                       class="ps-firma-field"
+                                       nolabel="1"
+                                       options="{'full_name': 'partner_id'}"/>
+                            </div>
+
+                            <!-- Checkbox de confirmación -->
+                            <div class="ps-checkbox-confirm mt-3">
+                                <field name="consentimiento_leido"
+                                       widget="boolean_toggle"
+                                       class="me-2"/> 
+                                <span class="small">
+                                    La clienta confirma que ha leído y aceptado el
+                                    aviso de privacidad y el consentimiento informado.
+                                </span>
+                            </div>
+
+                        </page>
+
+                        <!-- ── PASO 3: Datos del Servicio ─────────── -->
+                        <page string="💆 Servicio" name="servicio_tab"
+                              class="ps-tab-servicio">
+                            <group>
+                                <field name="artista_id"
+                                       options="{'no_create': True}"
+                                       widget="many2one_avatar_user"/>
+                                <field name="servicio_nombre" readonly="1"/>
+                                <field name="calendar_event_id" readonly="1"/>
+                                <field name="partner_id" readonly="1"/>
+                            </group>
+                        </page>
+
+                    </notebook>
+
+                </sheet>
+
+                <!-- Footer con botones -->
+                <footer class="ps-wizard-footer">
+                    <button name="action_confirmar_inicio"
+                            string="🚀 Confirmar Inicio"
+                            type="object"
+                            class="btn-primary btn-lg ps-btn-confirm w-100"/>
+                    <button string="Cancelar"
+                            special="cancel"
+                            class="btn-secondary"/>
+                </footer>
+
+            </form>
+        </field>
+    </record>
+
+</odoo>

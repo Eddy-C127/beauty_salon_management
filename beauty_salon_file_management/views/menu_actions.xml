@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         ESTRUCTURA DE MENÚS - POP STUDIO
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── MENÚ RAÍZ ────────────────────────────────────────────────────── -->
+    <menuitem id="menu_popstudio_root"
+              name="🌸 Pop Studio"
+              sequence="50"
+              groups="beauty_salon_file_management.group_popstudio_recepcionista"
+              web_icon="beauty_salon_file_management,static/description/icon.png"/>
+
+    <!-- ── SUBMENÚ: CITAS ────────────────────────────────────────────────── -->
+    <menuitem id="menu_popstudio_citas"
+              name="📅 Citas"
+              parent="menu_popstudio_root"
+              sequence="10"
+              groups="beauty_salon_file_management.group_popstudio_recepcionista"/>
+
+    <menuitem id="menu_popstudio_citas_hoy"
+              name="📅 Citas de Hoy"
+              parent="menu_popstudio_citas"
+              action="action_citas_popstudio"
+              sequence="10"
+              groups="beauty_salon_file_management.group_popstudio_recepcionista"/>
+
+    <menuitem id="menu_popstudio_calendar"
+              name="🗓️ Calendario"
+              parent="menu_popstudio_citas"
+              action="calendar.action_calendar_event"
+              sequence="20"
+              groups="beauty_salon_file_management.group_popstudio_recepcionista"/>
+
+    <!-- ── SUBMENÚ: EXPEDIENTES ──────────────────────────────────────────── -->
+    <menuitem id="menu_popstudio_expedientes"
+              name="📋 Expedientes"
+              parent="menu_popstudio_root"
+              sequence="20"
+              groups="beauty_salon_file_management.group_popstudio_artista"/>
+
+    <menuitem id="menu_popstudio_sesiones"
+              name="🩺 Historial de Sesiones"
+              parent="menu_popstudio_expedientes"
+              action="action_expediente_sesion"
+              sequence="10"
+              groups="beauty_salon_file_management.group_popstudio_artista"/>
+
+    <menuitem id="menu_popstudio_clientas"
+              name="👤 Clientas / Expedientes"
+              parent="menu_popstudio_expedientes"
+              action="contacts.action_contacts"
+              sequence="20"
+              groups="beauty_salon_file_management.group_popstudio_artista"/>
+
+    <!-- ── SUBMENÚ: AUDITORÍA (Solo Managers) ────────────────────────────── -->
+    <menuitem id="menu_popstudio_auditoria"
+              name="📊 Auditoría"
+              parent="menu_popstudio_root"
+              sequence="30"
+              groups="beauty_salon_file_management.group_popstudio_manager"/>
+
+    <menuitem id="menu_board_popstudio"
+              name="📊 Tablero Pop Studio"
+              parent="menu_popstudio_auditoria"
+              action="action_open_board_popstudio"
+              sequence="1"
+              groups="beauty_salon_file_management.group_popstudio_manager"/>
+
+    <menuitem id="menu_dashboard_citas"
+              name="📈 Dashboard de Citas"
+              parent="menu_popstudio_auditoria"
+              action="action_dashboard_citas"
+              sequence="5"
+              groups="beauty_salon_file_management.group_popstudio_manager"/>
+
+    <menuitem id="menu_auditoria_expedientes"
+              name="📋 Reporte de Cumplimiento"
+              parent="menu_popstudio_auditoria"
+              action="action_auditoria_expedientes"
+              sequence="10"
+              groups="beauty_salon_file_management.group_popstudio_manager"/>
+
+    <menuitem id="menu_auditoria_faltantes"
+              name="❌ Expedientes Faltantes"
+              parent="menu_popstudio_auditoria"
+              action="action_expedientes_faltantes"
+              sequence="20"
+              groups="beauty_salon_file_management.group_popstudio_manager"/>
+
+    <menuitem id="menu_auditoria_todas_sesiones"
+              name="📋 Todas las Sesiones"
+              parent="menu_popstudio_auditoria"
+              action="action_todas_sesiones_auditoria"
+              sequence="30"
+              groups="beauty_salon_file_management.group_popstudio_manager"/>
+
+</odoo>

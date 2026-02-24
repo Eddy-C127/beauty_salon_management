@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    
+    <record id="sale_commission_plan_view_form_inherit_line_calc" model="ir.ui.view">
+        <field name="name">sale.commission.plan.view.form.inherit.line.calc</field>
+        <field name="model">sale.commission.plan</field>
+        <field name="inherit_id" ref="sale_commission.sale_commission_plan_view_form"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//field[@name='achievement_ids']//field[@name='type']" position="after">
+                <field name="enable_line_commission" string="Per Line"/>
+            </xpath>
+            
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         VISTAS: popstudio.expediente.sesion
+         Expediente individual de cada sesión de clienta
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── VISTA FORM ──────────────────────────────────────────────────── -->
+    <record id="view_expediente_sesion_form" model="ir.ui.view">
+        <field name="name">popstudio.expediente.sesion.form</field>
+        <field name="model">popstudio.expediente.sesion</field>
+        <field name="arch" type="xml">
+            <form string="Expediente de Sesión" class="popstudio-form">
+                <header>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="borrador,en_curso,completada"/>
+                    <button name="action_completar"
+                            string="✅ Marcar Completada"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state == 'completada'"/>
+                    <button name="action_ver_expediente_partner"
+                            string="👤 Ver Expediente Completo"
+                            type="object"
+                            class="btn-secondary"/>
+                </header>
+
+                <sheet>
+                    <!-- Alertas médicas destacadas -->
+                    <div class="alert alert-danger ps-alert-alergias"
+                         invisible="not partner_alergias">
+                        <h5 class="alert-heading">
+                            <i class="fa fa-exclamation-triangle"/> ALERGIAS CONOCIDAS
+                        </h5>
+                        <field name="partner_alergias" readonly="1" nolabel="1"
+                               class="fw-bold text-danger"/>
+                    </div>
+
+                    <!-- Título / Encabezado -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="display_name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Información de la Sesión" col="2">
+                            <field name="partner_id"
+                                   options="{'no_create': True}"
+                                   widget="many2one_avatar_user"/>
+                            <field name="calendar_event_id"
+                                   options="{'no_create': True}"/>
+                            <field name="artista_id"
+                                   options="{'no_create': True}"/>
+                            <field name="fecha_sesion"/>
+                            <field name="servicio_realizado"/>
+                            <field name="state" invisible="1"/>
+                        </group>
+                        <group string="Satisfacción" col="2">
+                            <field name="nivel_satisfaccion" widget="priority"/>
+                            <field name="comentario_cliente"/>
+                            <field name="consentimiento_aceptado" readonly="1"/>
+                            <field name="firma_consentimiento_fecha" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Notebook con pestañas -->
+                    <notebook>
+
+                        <!-- ── Pestaña: Fotografías ──────────────────── -->
+                        <page string="📸 Fotografías" name="fotografias">
+                            <div class="row ps-foto-grid">
+                                <div class="col-md-6 ps-foto-col">
+                                    <div class="ps-foto-card">
+                                        <h4 class="ps-foto-label">
+                                            <i class="fa fa-camera"/> ANTES
+                                        </h4>
+                                        <field name="foto_antes_ids"
+                                               widget="many2many_binary"
+                                               class="ps-foto-before"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 ps-foto-col">
+                                    <div class="ps-foto-card">
+                                        <h4 class="ps-foto-label">
+                                            <i class="fa fa-camera"/> DESPUÉS
+                                        </h4>
+                                        <field name="foto_despues_ids"
+                                               widget="many2many_binary"
+                                               class="ps-foto-after"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </page>
+
+                        <!-- ── Pestaña: Notas Clínicas ───────────────── -->
+                        <page string="📝 Notas Clínicas" name="notas">
+                            <group>
+                                <field name="productos_usados"
+                                       placeholder="Ej: Tinte L'Oreal 7.1, Oxidante 20 vol, Mascarilla Kerastase..."/>
+                                <field name="reacciones_adversas"
+                                       placeholder="Si no hubo reacciones, dejar en blanco..."/>
+                            </group>
+                            <field name="notas_internas"
+                                   widget="html"
+                                   placeholder="Notas técnicas del procedimiento: técnica usada, porcentajes de mezcla, tiempo de exposición..."
+                                   style="min-height: 140px;"/>
+                            <separator string="💡 Recomendaciones Post-Tratamiento"/>
+                            <field name="recomendaciones_cuidado"
+                                   widget="html"
+                                   placeholder="Instrucciones de cuidado en casa para la clienta..."
+                                   style="min-height: 100px;"/>
+                        </page>
+
+                        <!-- ── Pestaña: Consentimiento ───────────────── -->
+                        <page string="✍️ Consentimiento" name="consentimiento">
+                            <group>
+                                <field name="consentimiento_aceptado" readonly="1"/>
+                                <field name="firma_consentimiento_fecha" readonly="1"/>
+                            </group>
+                            <div class="text-center" invisible="not firma_consentimiento">
+                                <p class="text-muted">Firma registrada:</p>
+                                <field name="firma_consentimiento"
+                                       widget="image"
+                                       class="ps-firma-display"
+                                       readonly="1"/>
+                            </div>
+                            <div class="alert alert-warning" invisible="firma_consentimiento">
+                                <i class="fa fa-warning"/> Sin firma de consentimiento registrada.
+                            </div>
+                        </page>
+
+                        <!-- ── Pestaña: Chatter ──────────────────────── -->
+                        <page string="🗒️ Actividad" name="actividad">
+                            <div class="oe_chatter">
+                                <field name="message_follower_ids"/>
+                                <field name="activity_ids"/>
+                                <field name="message_ids"/>
+                            </div>
+                        </page>
+
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── VISTA LIST (TREE) ────────────────────────────────────────────── -->
+    <record id="view_expediente_sesion_list" model="ir.ui.view">
+        <field name="name">popstudio.expediente.sesion.list</field>
+        <field name="model">popstudio.expediente.sesion</field>
+        <field name="arch" type="xml">
+            <list string="Expedientes de Sesiones"
+                  decoration-success="state == 'completada'"
+                  decoration-info="state == 'en_curso'"
+                  decoration-muted="state == 'borrador'"
+                  default_order="fecha_sesion desc">
+                <field name="fecha_sesion" string="Fecha"/>
+                <field name="partner_id" string="Clienta" widget="many2one_avatar"/>
+                <field name="artista_id" string="Artista" widget="many2one_avatar_user"/>
+                <field name="servicio_realizado" string="Servicio"/>
+                <field name="nivel_satisfaccion" string="Satisfacción" widget="priority"/>
+                <field name="consentimiento_aceptado" widget="boolean_toggle" readonly="1"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'completada'"
+                       decoration-warning="state == 'en_curso'"
+                       decoration-muted="state == 'borrador'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── VISTA KANBAN ─────────────────────────────────────────────────── -->
+    <record id="view_expediente_sesion_kanban" model="ir.ui.view">
+        <field name="name">popstudio.expediente.sesion.kanban</field>
+        <field name="model">popstudio.expediente.sesion</field>
+        <field name="arch" type="xml">
+            <kanban class="ps-kanban" default_group_by="state"
+                    quick_create="false">
+                <field name="partner_id"/>
+                <field name="artista_id"/>
+                <field name="fecha_sesion"/>
+                <field name="foto_antes_ids"/>
+                <field name="foto_despues_ids"/>
+                <field name="nivel_satisfaccion"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click ps-kanban-card">
+                            <div class="ps-kanban-header">
+                                <div class="ps-kanban-no-foto" style="height: 100px;">
+                                    <i class="fa fa-camera-retro fa-3x text-muted"/>
+                                </div>
+                            </div>
+                            <div class="ps-kanban-body">
+                                <strong>
+                                    <field name="partner_id"/>
+                                </strong>
+                                <small class="text-muted d-block">
+                                    <field name="fecha_sesion" widget="date"/>
+                                </small>
+                                <div class="mt-1">
+                                    <field name="nivel_satisfaccion" widget="priority"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ── VISTA BÚSQUEDA ───────────────────────────────────────────────── -->
+    <record id="view_expediente_sesion_search" model="ir.ui.view">
+        <field name="name">popstudio.expediente.sesion.search</field>
+        <field name="model">popstudio.expediente.sesion</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Expedientes">
+                <field name="partner_id" string="Clienta"/>
+                <field name="artista_id" string="Artista"/>
+                <field name="servicio_realizado"/>
+                <separator/>
+                <filter string="✅ Completadas" name="completadas"
+                        domain="[('state', '=', 'completada')]"/>
+                <filter string="🔄 En Curso" name="en_curso"
+                        domain="[('state', '=', 'en_curso')]"/>
+                <filter string="📝 Borrador" name="borrador"
+                        domain="[('state', '=', 'borrador')]"/>
+                <filter string="⭐⭐⭐⭐⭐ Excelentes" name="satisfaccion_alta"
+                        domain="[('nivel_satisfaccion', '=', '5')]"/>
+                <separator/>
+                <filter string="Hoy" name="hoy"
+                        domain="[('fecha_sesion', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <filter string="Esta Semana" name="esta_semana"
+                        domain="[('fecha_sesion', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Artista" name="group_artista"
+                            context="{'group_by': 'artista_id'}"/>
+                    <filter string="Estado" name="group_state"
+                            context="{'group_by': 'state'}"/>
+                    <filter string="Mes" name="group_mes"
+                            context="{'group_by': 'fecha_sesion:month'}"/>
+                    <filter string="Satisfacción" name="group_satisfaccion"
+                            context="{'group_by': 'nivel_satisfaccion'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── ACCIÓN ────────────────────────────────────────────────────────── -->
+    <record id="action_expediente_sesion" model="ir.actions.act_window">
+        <field name="name">Expedientes de Sesiones</field>
+        <field name="res_model">popstudio.expediente.sesion</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="view_expediente_sesion_search"/>
+        <field name="context">{'search_default_completadas': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay expedientes de sesiones registrados
+            </p>
+            <p>
+                Los expedientes se crean automáticamente al
+                <strong>Concluir una Cita</strong> desde el calendario.
+            </p>
+        </field>
+    </record>
+
+</odoo>

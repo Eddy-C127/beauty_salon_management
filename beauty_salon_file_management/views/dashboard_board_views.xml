@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         TABLERO POP STUDIO — Board Dashboard
+         Usa el módulo board para crear un tablero tipo Power BI
+         con gráficas y tablas de citas y expedientes.
+    ═══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         ACCIONES DEDICADAS PARA CADA BLOQUE DEL TABLERO
+    ══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Bloque 1: Gráfica de barras — Citas por Artista (Completos vs Faltantes) -->
+    <record id="action_board_bar_artista" model="ir.actions.act_window">
+        <field name="name">Citas por Artista</field>
+        <field name="res_model">calendar.event</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_dashboard_graph_bar"/>
+        <field name="search_view_id" ref="view_dashboard_auditoria_search"/>
+        <field name="domain">[('appointment_status', 'in', ['concluded', 'attended'])]</field>
+        <field name="context">{
+            'search_default_este_mes': 1,
+        }</field>
+    </record>
+
+    <!-- Bloque 2: Gráfica de pie — Proporción Completos vs Faltantes -->
+    <record id="action_board_pie_expedientes" model="ir.actions.act_window">
+        <field name="name">Estado de Expedientes</field>
+        <field name="res_model">calendar.event</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_dashboard_graph_pie"/>
+        <field name="search_view_id" ref="view_dashboard_auditoria_search"/>
+        <field name="domain">[('appointment_status', 'in', ['concluded', 'attended'])]</field>
+        <field name="context">{
+            'search_default_este_mes': 1,
+        }</field>
+    </record>
+
+    <!-- Bloque 3: Pivot — Detalle numérico por Artista × Mes -->
+    <record id="action_board_pivot_detalle" model="ir.actions.act_window">
+        <field name="name">Detalle por Artista</field>
+        <field name="res_model">calendar.event</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="view_dashboard_pivot"/>
+        <field name="search_view_id" ref="view_dashboard_auditoria_search"/>
+        <field name="domain">[('appointment_status', 'in', ['concluded', 'attended'])]</field>
+        <field name="context">{
+            'search_default_este_mes': 1,
+        }</field>
+    </record>
+
+    <!-- Bloque 4: Tendencia — Línea temporal de citas -->
+    <record id="action_board_line_tendencia" model="ir.actions.act_window">
+        <field name="name">Tendencia Semanal</field>
+        <field name="res_model">calendar.event</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_dashboard_graph_line"/>
+        <field name="search_view_id" ref="view_dashboard_auditoria_search"/>
+        <field name="domain">[('appointment_status', 'in', ['concluded', 'attended', 'booked'])]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Bloque 5: Lista — Expedientes faltantes (citas sin expediente completo) -->
+    <record id="action_board_list_faltantes" model="ir.actions.act_window">
+        <field name="name">Expedientes Faltantes</field>
+        <field name="res_model">calendar.event</field>
+        <field name="view_mode">list</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_calendar_event_popstudio_list')}),
+        ]"/>
+        <field name="search_view_id" ref="view_dashboard_auditoria_search"/>
+        <field name="domain">[
+            ('appointment_status', '=', 'concluded'),
+            ('expediente_completado', '=', False)
+        ]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         VISTA BOARD — Layout 2-1 (2/3 izquierda + 1/3 derecha)
+    ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_board_popstudio_dashboard" model="ir.ui.view">
+        <field name="name">Pop Studio - Tablero de Citas</field>
+        <field name="model">board.board</field>
+        <field name="arch" type="xml">
+            <form string="Tablero Pop Studio - Citas y Expedientes">
+                <board style="2-1">
+                    <column>
+                        <action name="%(action_board_bar_artista)d"
+                                string="Citas por Artista — Completos vs Faltantes"
+                                view_mode="graph"/>
+                        <action name="%(action_board_pivot_detalle)d"
+                                string="Detalle por Artista y Periodo"
+                                view_mode="pivot"/>
+                    </column>
+                    <column>
+                        <action name="%(action_board_pie_expedientes)d"
+                                string="Proporcion de Expedientes"
+                                view_mode="graph"/>
+                        <action name="%(action_board_list_faltantes)d"
+                                string="Expedientes Faltantes"
+                                view_mode="list"/>
+                    </column>
+                </board>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         ACCIÓN PARA ABRIR EL TABLERO
+    ══════════════════════════════════════════════════════════════════════ -->
+    <record id="action_open_board_popstudio" model="ir.actions.act_window">
+        <field name="name">Tablero Pop Studio</field>
+        <field name="res_model">board.board</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_board_popstudio_dashboard"/>
+        <field name="usage">menu</field>
+    </record>
+
+</odoo>

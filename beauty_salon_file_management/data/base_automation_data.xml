@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             AUTOMATIZACIONES: Flujo de Auditoría Pop Studio
+        ═══════════════════════════════════════════════════════════════════════ -->
+
+        <!-- Regla: Detectar citas "En Curso" que llevan más de 4 horas sin concluir -->
+        <record id="automation_cita_en_curso_alerta" model="base.automation">
+            <field name="name">Pop Studio: Alerta Cita Demasiado Larga</field>
+            <field name="model_id" ref="calendar.model_calendar_event"/>
+            <field name="trigger">on_time</field>
+            <field name="trg_date_id" ref="calendar.field_calendar_event__start"/>
+            <field name="trg_date_range">4</field>
+            <field name="trg_date_range_type">hours</field>
+            <field name="filter_domain">[('popstudio_state', '=', 'en_curso')]</field>
+            <field name="action_server_id" eval="False"/>
+            <field name="active">True</field>
+        </record>
+
+    </data>
+</odoo>
