@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ==================== LIST VIEW ==================== -->
+    <record id="view_n8n_company_context_list" model="ir.ui.view">
+        <field name="name">n8n.company.context.list</field>
+        <field name="model">n8n.company.context</field>
+        <field name="arch" type="xml">
+            <list string="Contexto de Empresa">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="topic_key" optional="show"/>
+                <field name="branch_ids" widget="many2many_tags" optional="show"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ==================== FORM VIEW ==================== -->
+    <record id="view_n8n_company_context_form" model="ir.ui.view">
+        <field name="name">n8n.company.context.form</field>
+        <field name="model">n8n.company.context</field>
+        <field name="arch" type="xml">
+            <form string="Contexto de Empresa">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object"
+                                class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button"
+                                   options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Ej: Política de Cancelaciones"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Identificación">
+                            <field name="topic_key" placeholder="Ej: cancelaciones"/>
+                            <field name="sequence"/>
+                            <field name="branch_ids" widget="many2many_tags"
+                                   placeholder="Vacío = aplica a todas las sucursales"
+                                   domain="[]"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Contenido" name="content">
+                            <field name="content" widget="text" nolabel="1"
+                                   placeholder="Escribe aquí la información que el agente devolverá al consultar este tema..."
+                                   style="min-height: 200px;"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ==================== ACTION ==================== -->
+    <record id="action_n8n_company_context" model="ir.actions.act_window">
+        <field name="name">Contexto de Empresa</field>
+        <field name="res_model">n8n.company.context</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Agrega tu primer tema de contexto
+            </p>
+            <p>
+                Configura la información que el agente de IA (Valentina) puede consultar:
+                políticas, horarios, términos y condiciones, etc.
+            </p>
+        </field>
+    </record>
+
+    <!-- ==================== MENÚ ==================== -->
+    <menuitem id="menu_n8n_company_context"
+              name="Contexto de Empresa"
+              parent="menu_n8n_integration_root"
+              action="action_n8n_company_context"
+              sequence="30"/>
+
+</odoo>

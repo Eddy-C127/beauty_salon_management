@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Agregar campos ManyChat/Instagram al formulario de contactos -->
+    <record id="view_partner_form_manychat" model="ir.ui.view">
+        <field name="name">res.partner.form.manychat</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <field name="mobile" position="after">
+                <field name="manychat_subscriber_id"
+                       string="ManyChat ID"
+                       placeholder="ID de suscriptor Instagram/ManyChat"
+                       readonly="1"
+                       colspan="2"/>
+                <field name="instagram_name"
+                       string="Nombre en Instagram"
+                       placeholder="Nombre en Instagram"
+                       readonly="1"
+                       colspan="2"/>
+                <field name="ig_session_state"
+                       string="Sesión Instagram"
+                       readonly="1"
+                       invisible="not ig_session_state"
+                       colspan="2"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

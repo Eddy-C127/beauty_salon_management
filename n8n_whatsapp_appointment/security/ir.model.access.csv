@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_n8n_webhook_config_user,n8n.webhook.config user,model_n8n_webhook_config,base.group_user,1,0,0,0
+access_n8n_webhook_config_manager,n8n.webhook.config manager,model_n8n_webhook_config,base.group_system,1,1,1,1
+access_n8n_api_endpoint_user,n8n.api.endpoint user,model_n8n_api_endpoint,base.group_user,1,0,0,0
+access_n8n_api_endpoint_manager,n8n.api.endpoint manager,model_n8n_api_endpoint,base.group_system,1,1,1,1
+access_n8n_company_context_user,n8n.company.context user,model_n8n_company_context,base.group_user,1,0,0,0
+access_n8n_company_context_manager,n8n.company.context manager,model_n8n_company_context,base.group_system,1,1,1,1

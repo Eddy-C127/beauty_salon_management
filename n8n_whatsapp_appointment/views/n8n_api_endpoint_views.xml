@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ==================== LIST VIEW ==================== -->
+    <record id="view_n8n_api_endpoint_list" model="ir.ui.view">
+        <field name="name">n8n.api.endpoint.list</field>
+        <field name="model">n8n.api.endpoint</field>
+        <field name="arch" type="xml">
+            <list string="Endpoints API" create="false" delete="false" edit="false">
+                <field name="sequence" widget="handle"/>
+                <field name="http_method" widget="badge"
+                       decoration-success="http_method == 'POST'"
+                       decoration-info="http_method == 'GET'"/>
+                <field name="direction" widget="badge"
+                       decoration-warning="direction == 'outbound'"
+                       decoration-primary="direction == 'inbound'"/>
+                <field name="name"/>
+                <field name="path" optional="show"/>
+                <field name="n8n_node_type" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ==================== FORM VIEW ==================== -->
+    <record id="view_n8n_api_endpoint_form" model="ir.ui.view">
+        <field name="name">n8n.api.endpoint.form</field>
+        <field name="model">n8n.api.endpoint</field>
+        <field name="arch" type="xml">
+            <form string="Endpoint API" create="false" delete="false">
+                <sheet>
+                    <div class="oe_title">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <field name="http_method" widget="badge"
+                                   decoration-success="http_method == 'POST'"
+                                   decoration-info="http_method == 'GET'"
+                                   readonly="1"/>
+                            <field name="direction" widget="badge"
+                                   decoration-warning="direction == 'outbound'"
+                                   decoration-primary="direction == 'inbound'"
+                                   readonly="1"/>
+                        </div>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                        <h4 class="text-muted">
+                            <field name="path" readonly="1"/>
+                        </h4>
+                    </div>
+
+                    <group>
+                        <group string="¿Qué hace este endpoint?">
+                            <field name="description" nolabel="1"
+                                   widget="text" readonly="1"
+                                   style="white-space: pre-wrap;"/>
+                        </group>
+                        <group string="Nodo n8n recomendado">
+                            <field name="n8n_node_type" nolabel="1" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="📥 Parámetros de entrada" name="params">
+                            <field name="request_params" widget="text" readonly="1"
+                                   nolabel="1" style="white-space: pre; font-family: monospace; font-size: 13px;"/>
+                        </page>
+                        <page string="📤 Campos de respuesta" name="response">
+                            <field name="response_fields" widget="text" readonly="1"
+                                   nolabel="1" style="white-space: pre; font-family: monospace; font-size: 13px;"/>
+                        </page>
+                        <page string="📋 Ejemplo de body" name="example">
+                            <field name="body_example" widget="text" readonly="1"
+                                   nolabel="1" style="white-space: pre; font-family: monospace; font-size: 13px;"/>
+                        </page>
+                        <page string="⚙️ Cómo configurar en n8n" name="guide">
+                            <field name="n8n_config_guide" widget="text" readonly="1"
+                                   nolabel="1" style="white-space: pre-wrap; line-height: 1.8;"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ==================== ACTION ==================== -->
+    <record id="action_n8n_api_endpoint" model="ir.actions.act_window">
+        <field name="name">Endpoints API</field>
+        <field name="res_model">n8n.api.endpoint</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay endpoints registrados
+            </p>
+            <p>
+                Actualiza el módulo para cargar los endpoints disponibles.
+            </p>
+        </field>
+    </record>
+
+    <!-- ==================== MENÚ ==================== -->
+    <menuitem id="menu_n8n_api_endpoints"
+              name="Endpoints API"
+              parent="menu_n8n_integration_root"
+              action="action_n8n_api_endpoint"
+              sequence="20"/>
+
+</odoo>
