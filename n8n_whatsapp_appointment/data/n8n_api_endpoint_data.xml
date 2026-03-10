@@ -1,0 +1,825 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- ================================================================
+         ENDPOINT 1: get_catalog
+         ================================================================ -->
+    <record id="endpoint_get_catalog" model="n8n.api.endpoint">
+        <field name="sequence">10</field>
+        <field name="name">Catálogo (Sucursales / Categorías / Servicios)</field>
+        <field name="http_method">POST</field>
+        <field name="path">/api/n8n/appointment/catalog</field>
+        <field name="direction">inbound</field>
+        <field name="n8n_node_type">HTTP Request · Tool HTTP Request (AI Agent)</field>
+        <field name="description">Devuelve el catálogo del salón en tres modos:
+
+• mode = "branches"   → Lista de sucursales disponibles (id, name, code)
+• mode = "categories" → Lista de categorías de servicio (id, name)
+• mode = "services"   → Lista de servicios/citas publicados (id, name, precio, duración)
+                         Filtrables por branch_id y/o category_id
+
+Usa este endpoint en tres momentos del flujo:
+  1. Al iniciar → pide sucursales
+  2. Tras elegir sucursal → pide categorías
+  3. Tras elegir categoría → pide servicios filtrados</field>
+        <field name="request_params">Parámetro         Tipo    Requerido   Descripción
+─────────────────────────────────────────────────────────────────
+mode              string  Sí          "branches" | "categories" | "services"
+branch_id         number  No          ID de sucursal (solo para mode=services)
+category_id       number  No          ID de categoría (solo para mode=services)</field>
+        <field name="response_fields">── mode = "branches" ──
+branches[]
+  .id             number   ID de la sucursal
+  .name           string   Nombre de la sucursal
+  .code           string   Código corto
+
+── mode = "categories" ──
+categories[]
+  .id             number   ID de la categoría
+  .name           string   Nombre de la categoría
+
+── mode = "services" ──
+count             number   Total de servicios encontrados
+services[]
+  .id             number   ID del appointment.type (usar como appointment_type_id)
+  .name           string   Nombre del servicio
+  .branch_id      number   ID de la sucursal asociada
+  .branch_name    string   Nombre de la sucursal
+  .duration_h     float    Duración en horas (ej: 1.5 = 90 min)
+  .price          float    Precio del anticipo
+  .currency       string   Moneda (ej: MXN)</field>
+        <field name="body_example">{
+  "jsonrpc": "2.0",
+  "method": "call",
+  "params": {
+    "mode": "services",
+    "branch_id": 1,
+    "category_id": 3
+  }
+}</field>
+        <field name="n8n_config_guide">── Configuración en n8n (Tool HTTP Request para AI Agent) ──
+
+Nodo:        Tool HTTP Request
+Nombre:      get_catalog
+Descripción: Obtiene catálogo del salón. mode=branches → sucursales,
+             mode=categories → categorías, mode=services → servicios.
+
+Method:      POST
+URL:         https://[TU-ODOO]/api/n8n/appointment/catalog
+
+Body Content Type:  JSON
+Specify Body:       Using fields below
+
+  jsonrpc          →  2.0
+  method           →  call
+  params.mode      →  {{ $fromAI('mode','branches, categories o services','string') }}
+  params.branch_id →  {{ $fromAI('branch_id','ID sucursal, solo mode=services','number') }}
+  params.category_id → {{ $fromAI('category_id','ID categoría, solo mode=services','number') }}
+
+Headers:
+  Content-Type  →  application/json</field>
+    </record>
+
+    <!-- ================================================================
+         ENDPOINT 2: get_slots
+         ================================================================ -->
+    <record id="endpoint_get_slots" model="n8n.api.endpoint">
+        <field name="sequence">20</field>
+        <field name="name">Disponibilidad de Horarios</field>
+        <field name="http_method">POST</field>
+        <field name="path">/api/n8n/appointment/slots</field>
+        <field name="direction">inbound</field>
+        <field name="n8n_node_type">HTTP Request · Tool HTTP Request (AI Agent)</field>
+        <field name="description">Calcula y devuelve los slots (fecha + hora) disponibles para un servicio específico.
+
+Los slots se calculan en tiempo real con la disponibilidad actual del personal y recursos.
+Cada slot incluye el estilista asignado (si aplica) y la duración.
+
+Úsalo después de que el cliente elige el servicio para mostrarle fechas y horarios.</field>
+        <field name="request_params">Parámetro              Tipo    Requerido   Descripción
+──────────────────────────────────────────────────────────────────────
+appointment_type_id    number  Sí          ID del servicio (obtenido de get_catalog)
+timezone               string  No          Zona horaria (default: America/Mexico_City)
+staff_user_id          number  No          Filtrar por estilista específico
+reference_date         string  No          Fecha inicio búsqueda YYYY-MM-DD (default: hoy)</field>
+        <field name="response_fields">appointment_type_id    number   ID del servicio
+appointment_type_name  string   Nombre del servicio
+timezone               string   Zona horaria usada
+total_slots            number   Total de slots encontrados
+slots[]
+  .datetime            string   Fecha y hora: "YYYY-MM-DD HH:MM:SS"
+  .duration_h          float    Duración en horas
+  .staff_user_id       number   ID del estilista (si aplica)
+  .staff_user_name     string   Nombre del estilista (si aplica)</field>
+        <field name="body_example">{
+  "jsonrpc": "2.0",
+  "method": "call",
+  "params": {
+    "appointment_type_id": 5,
+    "timezone": "America/Mexico_City"
+  }
+}</field>
+        <field name="n8n_config_guide">── Configuración en n8n (Tool HTTP Request para AI Agent) ──
+
+Nodo:        Tool HTTP Request
+Nombre:      get_slots
+Descripción: Devuelve fechas y horarios disponibles para un servicio.
+             Requiere appointment_type_id del servicio elegido.
+
+Method:      POST
+URL:         https://[TU-ODOO]/api/n8n/appointment/slots
+
+Body Content Type:  JSON
+Specify Body:       Using fields below
+
+  jsonrpc                    →  2.0
+  method                     →  call
+  params.appointment_type_id →  {{ $fromAI('appointment_type_id','ID del servicio','number') }}
+  params.timezone            →  America/Mexico_City
+
+Headers:
+  Content-Type  →  application/json</field>
+    </record>
+
+    <!-- ================================================================
+         ENDPOINT 3: book_draft
+         ================================================================ -->
+    <record id="endpoint_book_draft" model="n8n.api.endpoint">
+        <field name="sequence">30</field>
+        <field name="name">Crear Reserva (Draft)</field>
+        <field name="http_method">POST</field>
+        <field name="path">/api/n8n/appointment/book_draft</field>
+        <field name="direction">inbound</field>
+        <field name="n8n_node_type">HTTP Request · Tool HTTP Request (AI Agent)</field>
+        <field name="description">Crea una reserva temporal (draft) pendiente de pago de anticipo.
+
+Al llamarlo, Odoo:
+  1. Busca o crea el partner por teléfono
+  2. Crea un calendar.booking en estado draft
+  3. Genera una sale.order con la línea del servicio
+  4. Crea y publica una factura de anticipo
+  5. Devuelve el checkout_url para que el cliente pague
+
+⚠️ El cliente tiene 30 minutos para pagar el anticipo.
+   Si no paga, la reserva debe cancelarse con cancel_draft.
+
+La reserva queda visible en el calendario desde el momento de creación.</field>
+        <field name="request_params">Parámetro              Tipo    Requerido   Descripción
+──────────────────────────────────────────────────────────────────────
+appointment_type_id    number  Sí          ID del servicio (de get_catalog)
+slot_datetime          string  Sí          Fecha y hora: "YYYY-MM-DD HH:MM:SS"
+partner_name           string  Sí          Nombre completo del cliente
+partner_phone          string  Sí          Teléfono con código país (ej: +5218711234567)
+staff_user_id          number  No          ID del estilista (de get_slots)
+timezone               string  No          Zona horaria del slot (default: America/Mexico_City)
+partner_email          string  No          Email del cliente</field>
+        <field name="response_fields">booking_id       number   ID del calendar.booking creado
+booking_token    string   Token único para cancelar la reserva (guardar en sesión)
+sale_order_id    number   ID de la sale.order generada
+invoice_id       number   ID de la factura de anticipo
+partner_id       number   ID del partner en Odoo
+partner_name     string   Nombre normalizado del cliente
+slot_start_utc   string   Inicio en UTC
+slot_end_utc     string   Fin en UTC
+advance_amount   float    Monto del anticipo a pagar
+currency         string   Moneda (ej: MXN)
+checkout_url     string   ⭐ URL de pago — enviar esta URL al cliente por WhatsApp</field>
+        <field name="body_example">{
+  "jsonrpc": "2.0",
+  "method": "call",
+  "params": {
+    "appointment_type_id": 5,
+    "slot_datetime": "2026-03-15 10:00:00",
+    "partner_name": "María García",
+    "partner_phone": "+5218711234567",
+    "staff_user_id": 8,
+    "timezone": "America/Mexico_City"
+  }
+}</field>
+        <field name="n8n_config_guide">── Configuración en n8n (Tool HTTP Request para AI Agent) ──
+
+Nodo:        Tool HTTP Request
+Nombre:      book_draft
+Descripción: Crea una reserva en Odoo. Requiere: appointment_type_id,
+             slot_datetime (YYYY-MM-DD HH:MM:SS), partner_name, partner_phone.
+             Devuelve checkout_url: enlace de pago del anticipo. Siempre mostrar al cliente.
+
+Method:      POST
+URL:         https://[TU-ODOO]/api/n8n/appointment/book_draft
+
+Body Content Type:  JSON
+Specify Body:       Using fields below
+
+  jsonrpc                    →  2.0
+  method                     →  call
+  params.appointment_type_id →  {{ $fromAI('appointment_type_id','ID del servicio','number') }}
+  params.slot_datetime       →  {{ $fromAI('slot_datetime','Fecha y hora YYYY-MM-DD HH:MM:SS','string') }}
+  params.partner_name        →  {{ $fromAI('partner_name','Nombre completo del cliente','string') }}
+  params.partner_phone       →  {{ $fromAI('partner_phone','Teléfono con código país','string') }}
+  params.staff_user_id       →  {{ $fromAI('staff_user_id','ID estilista (opcional)','number') }}
+  params.timezone            →  America/Mexico_City
+
+Headers:
+  Content-Type  →  application/json</field>
+    </record>
+
+    <!-- ================================================================
+         ENDPOINT 4: cancel_draft
+         ================================================================ -->
+    <record id="endpoint_cancel_draft" model="n8n.api.endpoint">
+        <field name="sequence">40</field>
+        <field name="name">Cancelar Reserva (Draft)</field>
+        <field name="http_method">POST</field>
+        <field name="path">/api/n8n/appointment/cancel_draft</field>
+        <field name="direction">inbound</field>
+        <field name="n8n_node_type">HTTP Request · Tool HTTP Request (AI Agent)</field>
+        <field name="description">Cancela una reserva que aún no fue pagada.
+
+Al cancelar, Odoo:
+  1. Marca el calendar.event como cancelado e inactivo
+  2. Cancela la factura de anticipo (si está en draft o posted)
+  3. Cancela la sale.order asociada
+  4. Elimina el calendar.booking
+
+⚠️ Solo funciona si el anticipo NO fue pagado.
+   Si el pago ya fue confirmado (status=booked), devuelve error 409
+   y el cliente debe contactar al salón directamente para cancelar.</field>
+        <field name="request_params">Parámetro       Tipo    Requerido   Descripción
+────────────────────────────────────────────────────────────────
+booking_token   string  Sí*         Token devuelto por book_draft
+booking_id      number  Sí*         ID del booking (alternativo al token)
+
+* Se requiere al menos uno de los dos (preferir booking_token)</field>
+        <field name="response_fields">booking_id      number   ID del booking cancelado
+booking_token   string   Token del booking cancelado
+cancelled       bool     true si la cancelación fue exitosa
+
+── Errores posibles ──
+404  →  Reserva no encontrada (token inválido o ya eliminada)
+409  →  La cita ya fue pagada, no se puede cancelar desde aquí</field>
+        <field name="body_example">{
+  "jsonrpc": "2.0",
+  "method": "call",
+  "params": {
+    "booking_token": "abc123xyz..."
+  }
+}</field>
+        <field name="n8n_config_guide">── Configuración en n8n (Tool HTTP Request para AI Agent) ──
+
+Nodo:        Tool HTTP Request
+Nombre:      cancel_draft
+Descripción: Cancela una reserva no pagada. Requiere booking_token (devuelto
+             por book_draft). Error 409 si ya fue pagada.
+
+Method:      POST
+URL:         https://[TU-ODOO]/api/n8n/appointment/cancel_draft
+
+Body Content Type:  JSON
+Specify Body:       Using fields below
+
+  jsonrpc                →  2.0
+  method                 →  call
+  params.booking_token   →  {{ $fromAI('booking_token','Token de la reserva a cancelar','string') }}
+
+Headers:
+  Content-Type  →  application/json</field>
+    </record>
+
+    <!-- ================================================================
+         ENDPOINT 5: my_appointments
+         ================================================================ -->
+    <record id="endpoint_my_appointments" model="n8n.api.endpoint">
+        <field name="sequence">50</field>
+        <field name="name">Mis Citas (por teléfono)</field>
+        <field name="http_method">POST</field>
+        <field name="path">/api/n8n/appointment/my_appointments</field>
+        <field name="direction">inbound</field>
+        <field name="n8n_node_type">HTTP Request · Tool HTTP Request (AI Agent)</field>
+        <field name="description">Busca y devuelve las citas agendadas de un cliente por su número de teléfono.
+
+Úsalo cuando el cliente pregunte:
+  • "¿Tengo alguna cita agendada?"
+  • "¿Cuándo es mi próxima cita?"
+  • "¿Qué citas tengo esta semana?"
+  • "¿Cuál es mi historial de citas?"
+
+El endpoint normaliza automáticamente el número (maneja +52, 52, 10 dígitos, etc.)
+y busca en los campos mobile y phone del partner.
+
+Si el cliente no existe en Odoo, devuelve partner_found=false con mensaje amigable.</field>
+        <field name="request_params">Parámetro       Tipo    Requerido   Descripción
+────────────────────────────────────────────────────────────────
+phone           string  Sí          Teléfono en cualquier formato
+limit           number  No          Máximo de citas a devolver (default: 5)
+include_past    bool    No          true = incluir citas pasadas (default: false)</field>
+        <field name="response_fields">partner_found     bool     true si se encontró el cliente
+partner_id        number   ID del partner en Odoo
+partner_name      string   Nombre del cliente
+total             number   Total de citas devueltas
+appointments[]
+  .event_id       number   ID del calendar.event
+  .service        string   Nombre del servicio/tipo de cita
+  .start          string   Fecha y hora inicio (dd/mm/yyyy HH:MM, hora México)
+  .stop           string   Fecha y hora fin (dd/mm/yyyy HH:MM, hora México)
+  .start_raw      string   Fecha inicio en UTC (para comparaciones)
+  .status         string   Estado Odoo: request | booked | cancelled
+  .n8n_status     string   Estado n8n: draft | paid | cancelled
+  .staff          string   Nombre del estilista asignado
+  .location       string   Ubicación/sucursal
+
+── Si partner_found = false ──
+message           string   Mensaje explicativo para mostrar al cliente</field>
+        <field name="body_example">{
+  "jsonrpc": "2.0",
+  "method": "call",
+  "params": {
+    "phone": "+5218711234567",
+    "limit": 5,
+    "include_past": false
+  }
+}</field>
+        <field name="n8n_config_guide">── Configuración en n8n (Tool HTTP Request para AI Agent) ──
+
+Nodo:        Tool HTTP Request
+Nombre:      get_my_appointments
+Descripción: Busca las citas agendadas del cliente por teléfono. Usar el número
+             del cliente actual de la conversación. Si partner_found=false,
+             informar que no hay registros con ese número.
+
+Method:      POST
+URL:         https://[TU-ODOO]/api/n8n/appointment/my_appointments
+
+Body Content Type:  JSON
+Specify Body:       Using fields below
+
+  jsonrpc               →  2.0
+  method                →  call
+  params.phone          →  {{ $fromAI('phone','Teléfono del cliente de la conversación actual','string') }}
+  params.limit          →  {{ $fromAI('limit','Máximo de citas, default 5','number') }}
+  params.include_past   →  {{ $fromAI('include_past','true para historial, false solo futuras','boolean') }}
+
+Headers:
+  Content-Type  →  application/json</field>
+    </record>
+
+    <!-- ================================================================
+         ENDPOINT 6: expired_drafts
+         ================================================================ -->
+    <record id="endpoint_expired_drafts" model="n8n.api.endpoint">
+        <field name="sequence">55</field>
+        <field name="name">Reservas Expiradas Sin Pago</field>
+        <field name="http_method">POST</field>
+        <field name="path">/api/n8n/appointment/expired_drafts</field>
+        <field name="direction">inbound</field>
+        <field name="n8n_node_type">HTTP Request (Schedule Trigger — NO es Tool de AI Agent)</field>
+        <field name="description">Devuelve las reservas creadas vía WhatsApp/n8n que llevan más de X minutos
+sin pago confirmado (n8n_status='draft').
+
+Diseñado para usarse en un workflow de cancelación automática activado por
+Schedule Trigger (cada 5 minutos). El umbral real de expiración se controla
+con el parámetro "minutes" del body.
+
+Flujo recomendado en n8n:
+  1. Schedule Trigger → cada 5 min
+  2. HTTP Request → POST /expired_drafts  (minutes: 30)
+  3. IF expired_count > 0
+  4. SplitOut → itera sobre "expired"
+  5. HTTP Request → POST /cancel_draft   (booking_id)
+  6. HTTP Request → Evolution API → WhatsApp al cliente</field>
+        <field name="request_params">Parámetro   Tipo    Requerido   Descripción
+──────────────────────────────────────────────────────────────────
+minutes     number  No          Minutos desde la creación para considerar expirada (default: 30)
+limit       number  No          Máximo de registros a devolver (default: 50)</field>
+        <field name="response_fields">expired_count         number   Total de reservas expiradas encontradas
+expired[]
+  .booking_id           number   ID del calendar.booking → usar en cancel_draft
+  .booking_token        string   Token del booking → alternativa al booking_id
+  .partner_id           number   ID del partner en Odoo
+  .partner_name         string   Nombre del cliente
+  .partner_phone        string   Teléfono del cliente → usar para WhatsApp
+  .event_id             number   ID del calendar.event
+  .event_name           string   Nombre de la cita (ej: "Ana García - Corte - Norte")
+  .start                string   Fecha/hora de la cita en UTC
+  .created_at           string   Fecha/hora de creación de la reserva en UTC
+  .minutes_elapsed      number   Minutos transcurridos desde la creación
+  .invoice_id           number   ID de la factura de anticipo (no pagada)
+  .sale_order_id        number   ID de la sale.order asociada</field>
+        <field name="body_example">{
+  "minutes": 30,
+  "limit": 50
+}</field>
+        <field name="n8n_config_guide">── Configuración en n8n (HTTP Request dentro de workflow programado) ──
+
+Este endpoint NO es una Tool de AI Agent. Se usa en un workflow
+independiente activado por Schedule Trigger.
+
+Nodo:    HTTP Request
+Nombre:  Buscar_Reservas_Expiradas
+Method:  POST
+URL:     https://[TU-ODOO]/api/n8n/appointment/expired_drafts
+
+Body Content Type:  Raw / JSON
+Body:
+  {
+    "minutes": 30,
+    "limit": 50
+  }
+
+Headers:
+  Content-Type  →  application/json
+
+── Workflow completo de cancelación automática ──
+
+[Schedule Trigger: cada 5 min]
+  → [HTTP Request: POST /expired_drafts]
+  → [IF: expired_count > 0]
+      → [SplitOut: campo "expired"]
+          → [HTTP Request: POST /cancel_draft  body: { "booking_id": {{ $json.booking_id }} }]
+          → [IF: cancelled = true]
+              ✓ → [HTTP Request: Evolution API — WhatsApp al cliente]
+              ✗ → [Set: loguear error]
+
+── Mensaje WhatsApp sugerido ──
+Hola *{{ partner_name }}* 👋
+Tu reserva para *{{ event_name }}* fue cancelada porque no
+recibimos el pago en el tiempo indicado (30 minutos).
+Si deseas reagendar, escríbenos aquí 😊</field>
+    </record>
+
+    <!-- ================================================================
+         ENDPOINT 7: Webhook Pago Confirmado (SALIENTE — Odoo → n8n)
+         ================================================================ -->
+    <record id="endpoint_pago_confirmado" model="n8n.api.endpoint">
+        <field name="sequence">60</field>
+        <field name="name">Pago Confirmado (Webhook Saliente)</field>
+        <field name="http_method">POST</field>
+        <field name="path">Configurado en "Webhooks Salientes" → URL de n8n</field>
+        <field name="direction">outbound</field>
+        <field name="n8n_node_type">Webhook (Trigger) — en n8n, NO en Odoo</field>
+        <field name="description">Odoo notifica a n8n automáticamente cuando un cliente completa el pago del anticipo.
+
+Este webhook es SALIENTE: Odoo lo llama a n8n (no al revés).
+
+Flujo completo:
+  1. Cliente paga el anticipo en el checkout_url
+  2. Odoo confirma el pago (payment.transaction → done)
+  3. Odoo llama a TODOS los webhooks activos en "Webhooks Salientes"
+  4. n8n recibe el payload y envía confirmación por WhatsApp al cliente
+
+Para activarlo:
+  • En Odoo → Integración n8n → Webhooks Salientes → Crear registro
+  • Poner la URL del nodo Webhook de tu workflow de n8n
+  • Opcionalmente configurar un auth_token para seguridad</field>
+        <field name="request_params">── Payload enviado por Odoo (raw JSON POST, NO es JSON-RPC) ──
+
+event                   string   "appointment.payment.confirmed"
+event_id                number   ID del calendar.event
+n8n_reservation_id      string   ID de reserva n8n (si aplica)
+n8n_status              string   "paid"
+partner_id              number   ID del partner
+partner_name            string   Nombre del cliente
+partner_phone           string   Teléfono del cliente
+appointment_type_id     number   ID del tipo de cita
+appointment_type_name   string   Nombre del servicio
+start                   string   Fecha/hora inicio en ISO 8601 (UTC)
+stop                    string   Fecha/hora fin en ISO 8601 (UTC)</field>
+        <field name="response_fields">── Este endpoint es saliente: Odoo envía, n8n recibe ──
+
+n8n debe responder con HTTP 200 para confirmar recepción.
+Si n8n no responde, Odoo logea un warning pero NO falla el pago.</field>
+        <field name="body_example">{
+  "event": "appointment.payment.confirmed",
+  "event_id": 42,
+  "n8n_status": "paid",
+  "partner_id": 101,
+  "partner_name": "María García",
+  "partner_phone": "+5218711234567",
+  "appointment_type_id": 5,
+  "appointment_type_name": "Corte y Peinado",
+  "start": "2026-03-15T16:00:00",
+  "stop": "2026-03-15T17:30:00"
+}</field>
+        <field name="n8n_config_guide">── Configuración en n8n (Webhook Trigger) ──
+
+1. Crea un nodo "Webhook" en tu workflow de n8n
+   • HTTP Method: POST
+   • Path: odoo-pago-confirmado  (o el nombre que prefieras)
+   • Authentication: None (o Header Auth si usas token)
+
+2. Copia la URL de producción del webhook:
+   https://[TU-N8N]/webhook/odoo-pago-confirmado
+
+3. En Odoo → Integración n8n → Webhooks Salientes → Nuevo:
+   • Nombre: Confirmar Pago WhatsApp
+   • URL del Webhook: [pegar la URL del paso 2]
+   • Token (opcional): el mismo que configuraste en n8n
+
+4. El workflow de n8n debe:
+   a. Recibir el payload en el Webhook node
+      (datos en $json.body o $json directamente)
+   b. Extraer partner_phone y formatear la fecha (start es UTC)
+   c. Enviar mensaje de confirmación al cliente por WhatsApp
+      usando Evolution API → POST /message/sendText/{instancia}
+
+── Ejemplo de acceso en n8n Code node ──
+const body = $input.first().json.body ?? $input.first().json;
+const phone = body.partner_phone;
+const service = body.appointment_type_name;
+const start = new Date(body.start);</field>
+    </record>
+
+    <!-- ================================================================
+         ENDPOINT 10: partner_identify (Identificación inicial Instagram)
+         ================================================================ -->
+    <record id="endpoint_partner_identify" model="n8n.api.endpoint">
+        <field name="sequence">68</field>
+        <field name="name">Identificar Cliente Instagram (Primer Contacto)</field>
+        <field name="http_method">POST</field>
+        <field name="path">/api/n8n/partner/identify</field>
+        <field name="direction">inbound</field>
+        <field name="n8n_node_type">HTTP Request (sin AI Agent — primer nodo del flujo Instagram)</field>
+        <field name="description">Primer paso del flujo de identificación de cliente desde Instagram/ManyChat.
+Solo requiere manychat_id — NO requiere teléfono.
+
+Casos que maneja:
+  • Cliente ya vinculado con teléfono   → partner_found=true,  has_phone=true
+    → Continuar directamente al AI Agent con el cliente identificado
+  • Cliente ya vinculado sin teléfono   → partner_found=true,  has_phone=false
+    → Pedir teléfono y luego llamar a lookup_or_link para actualizarlo
+  • Cliente nuevo (manychat_id no existe en Odoo)  → partner_found=false, has_phone=false
+    → Pedir teléfono y luego llamar a lookup_or_link para crear o vincular
+
+Diferencia con lookup_or_link:
+  • identify   → solo identifica, NO crea, NO requiere teléfono
+  • lookup_or_link → busca o crea el partner, requiere teléfono si el cliente es nuevo
+
+Flujo de uso en n8n:
+  1. Primer mensaje del cliente → POST /identify (solo manychat_id)
+  2. Si has_phone=true  → AI Agent directo
+  3. Si has_phone=false → bot pide teléfono → POST /lookup_or_link (manychat_id + phone)
+  4. lookup_or_link crea o vincula → AI Agent</field>
+        <field name="request_params">Parámetro        Tipo    Requerido   Descripción
+──────────────────────────────────────────────────────────────────
+manychat_id      string  Sí          subscriber_id de ManyChat (ID único del suscriptor en Instagram)
+instagram_name   string  No          Nombre del usuario en Instagram (se guarda si el partner no tenía uno)</field>
+        <field name="response_fields">partner_found   bool     true si existe un partner con ese manychat_id en Odoo
+has_phone       bool     true si el partner tiene mobile o phone registrado
+partner_id      number   ID del res.partner (false si no existe)
+partner_name    string   Nombre del cliente en Odoo (false si no existe)
+phone           string   Teléfono del partner (false si no tiene)
+manychat_id     string   El mismo manychat_id enviado (para confirmar)
+
+── Combinaciones posibles ──
+partner_found=true,  has_phone=true   → cliente listo, pasar al AI Agent
+partner_found=true,  has_phone=false  → pedir teléfono → lookup_or_link
+partner_found=false, has_phone=false  → pedir teléfono → lookup_or_link</field>
+        <field name="body_example">{
+  "manychat_id": "12345678",
+  "instagram_name": "María García"
+}</field>
+        <field name="n8n_config_guide">── Configuración en n8n (HTTP Request — NO es Tool de AI Agent) ──
+
+Este endpoint se llama UNA VEZ al inicio del flujo, antes de cualquier otra lógica.
+No es una Tool: es un HTTP Request normal justo después del Webhook trigger.
+
+Nodo:    HTTP Request
+Nombre:  Identificar_Cliente
+Method:  POST
+URL:     https://[TU-ODOO]/api/n8n/partner/identify
+
+Body Content Type:  Raw / JSON
+Body:
+  {
+    "manychat_id": "{{ $json.subscriber_id }}",
+    "instagram_name": "{{ $json.first_name }} {{ $json.last_name }}"
+  }
+
+Headers:
+  Content-Type  →  application/json
+  X-N8N-Token   →  [tu-token-secreto]
+
+── Nodo IF después de Identificar_Cliente ──
+
+Condición: {{ $json.has_phone }} igual a true (tipo: boolean)
+
+  Rama TRUE (tiene teléfono) → Cliente identificado
+    → AI Agent con System Prompt:
+        "El cliente ya está registrado en Odoo:
+         Nombre: {{ $('Identificar_Cliente').item.json.partner_name }}
+         Teléfono: {{ $('Identificar_Cliente').item.json.phone }}
+         Partner ID: {{ $('Identificar_Cliente').item.json.partner_id }}"
+
+  Rama FALSE (sin teléfono o nuevo cliente)
+    → Enviar mensaje via Evolution API:
+        "¡Hola! Para continuar necesito tu número de WhatsApp 📱
+         ¿Me lo compartes con código de país? (ej: +5218711234567)"
+    → Webhook / Wait node → recibir número del cliente
+    → HTTP Request → POST /api/n8n/partner/lookup_or_link
+        body: {
+          "manychat_id": "{{ $('Identificar_Cliente').item.json.manychat_id }}",
+          "phone": "{{ número recibido }}",
+          "instagram_name": "{{ $('Identificar_Cliente').item.json.partner_name }}"
+        }
+    → Cuando lookup_or_link responde → continuar al AI Agent
+
+── Variables útiles para el System Prompt del AI Agent ──
+
+Nombre:     {{ $('Identificar_Cliente').item.json.partner_name || 'Cliente nuevo' }}
+Teléfono:   {{ $('Identificar_Cliente').item.json.phone || 'Sin registrar' }}
+Partner ID: {{ $('Identificar_Cliente').item.json.partner_id || 'Pendiente' }}</field>
+    </record>
+
+    <!-- ================================================================
+         ENDPOINT 9: partner_lookup_or_link (Instagram / ManyChat)
+         ================================================================ -->
+    <record id="endpoint_partner_lookup_or_link" model="n8n.api.endpoint">
+        <field name="sequence">70</field>
+        <field name="name">Vincular Cliente Instagram (ManyChat)</field>
+        <field name="http_method">POST</field>
+        <field name="path">/api/n8n/partner/lookup_or_link</field>
+        <field name="direction">inbound</field>
+        <field name="n8n_node_type">HTTP Request (sin AI Agent — llamar al inicio del flujo Instagram)</field>
+        <field name="description">Busca o vincula un res.partner de Odoo con un suscriptor de ManyChat (Instagram).
+
+Lógica en orden de prioridad (4 casos):
+  CASO A: manychat_id ya existe en Odoo + tiene teléfono
+          → retorna listo para agendar (has_phone=true)
+
+  CASO B: manychat_id ya existe en Odoo + sin teléfono
+          → si se envió phone, lo guarda y retorna listo
+          → si no se envió phone, retorna has_phone=false para pedir teléfono
+
+  CASO C: manychat_id NO existe, pero phone SÍ existe en Odoo
+          → vincula el manychat_id al partner existente y retorna listo
+
+  CASO D: ni manychat_id ni phone existen en Odoo
+          → crea un partner nuevo y retorna
+
+Flujo recomendado en n8n:
+  1. identify(manychat_id) → si has_phone=false → pedir teléfono
+  2. lookup_or_link(manychat_id + phone) → siempre retorna listo o crea contacto</field>
+        <field name="request_params">Parámetro      Tipo    Requerido   Descripción
+──────────────────────────────────────────────────────────────────────────────────
+manychat_id    string  Sí          subscriber_id de ManyChat (ID único del usuario en Instagram)
+phone          string  Condicional Teléfono del cliente. Requerido si el partner no existe por manychat_id
+instagram_name string  No          Nombre en Instagram. Se guarda al crear o si el nombre parece un teléfono</field>
+        <field name="response_fields">case            string   "A" | "B" | "C" | "D" — cuál de los 4 casos ocurrió
+partner_found   bool     true si el partner ya existía (false = fue creado nuevo)
+has_phone       bool     true si el partner tiene teléfono al finalizar
+linked          bool     true si el manychat_id quedó vinculado en este call
+partner_id      number   ID del res.partner
+partner_name    string   Nombre del cliente en Odoo
+phone           string   Teléfono registrado (false si no tiene)
+manychat_id     string   El mismo manychat_id enviado (confirmación)
+
+── Errores posibles ──
+400  →  manychat_id faltante
+400  →  No existe por manychat_id y no se proporcionó phone</field>
+        <field name="body_example">{
+  "manychat_id": "12345678",
+  "phone": "+5218711234567",
+  "instagram_name": "María García"
+}</field>
+        <field name="n8n_config_guide">── Flujo completo en n8n ──
+
+[Webhook Trigger — Instagram/ManyChat]
+  ↓
+[HTTP Request: identify]
+  POST /api/n8n/partner/identify
+  body: { "manychat_id": "{{ $json.subscriber_id }}", "instagram_name": "{{ $json.first_name }} {{ $json.last_name }}" }
+  ↓
+[IF: has_phone = true]
+  ✓ Rama TRUE → AI Agent (cliente completo)
+  ✗ Rama FALSE → Enviar mensaje pidiendo teléfono
+      ↓
+      [Esperar respuesta del cliente con su teléfono]
+      ↓
+      [HTTP Request: lookup_or_link]
+        POST /api/n8n/partner/lookup_or_link
+        body: {
+          "manychat_id": "{{ $('identify').item.json.manychat_id }}",
+          "phone": "{{ $json.body.text }}",
+          "instagram_name": "{{ $('identify').item.json.partner_name }}"
+        }
+        ↓
+      [IF: case = "D" (nuevo contacto sin nombre real)]
+        ✓ Rama D → Enviar mensaje pidiendo nombre completo → guardar y continuar
+        ✗ Rama A/B/C → AI Agent (cliente vinculado)
+
+── Configuración del nodo lookup_or_link ──
+
+Nodo:    HTTP Request
+Nombre:  Vincular_Cliente_Instagram
+Method:  POST
+URL:     https://[TU-ODOO]/api/n8n/partner/lookup_or_link
+
+Body Content Type:  Raw / JSON
+Body:
+  {
+    "manychat_id": "{{ $('Identificar_Cliente').item.json.manychat_id }}",
+    "phone": "{{ número recibido del cliente }}",
+    "instagram_name": "{{ nombre de Instagram }}"
+  }
+
+Headers:
+  Content-Type  →  application/json
+  X-N8N-Token   →  [tu-token-secreto]
+
+── Variables útiles para el System Prompt del AI Agent ──
+
+case:         {{ $json.case }}         → para logging/debug
+Nombre:       {{ $json.partner_name }}
+Teléfono:     {{ $json.phone }}
+Partner ID:   {{ $json.partner_id }}
+Vinculado:    {{ $json.linked }}</field>
+    </record>
+
+    <!-- ================================================================
+         ENDPOINT 8: get_context (Contexto de Empresa)
+         ================================================================ -->
+    <record id="endpoint_get_context" model="n8n.api.endpoint">
+        <field name="sequence">65</field>
+        <field name="name">Contexto de Empresa (Políticas / Horarios / Info)</field>
+        <field name="http_method">GET</field>
+        <field name="path">/api/n8n/appointment/context</field>
+        <field name="direction">inbound</field>
+        <field name="n8n_node_type">HTTP Request · Tool HTTP Request (AI Agent)</field>
+        <field name="description">Devuelve el contenido configurable de un tema específico para el agente de IA.
+
+Úsalo para consultar información de la empresa sin hardcodearla en el prompt del agente:
+  • "cancelaciones"  → Política de cancelaciones y reembolsos
+  • "horarios"       → Horarios de atención por sucursal
+  • "terminos"       → Términos y condiciones del servicio
+  • "anticipos"      → Política de anticipos y pagos
+  • "ubicaciones"    → Direcciones y cómo llegar
+
+Los temas se configuran en Odoo → Integración n8n → Contexto de Empresa.
+Cada tema puede ser global (aplica a todas las sucursales) o específico de una sucursal (stock.warehouse).</field>
+        <field name="request_params">Parámetro    Tipo    Requerido   Descripción
+────────────────────────────────────────────────────────────────────
+topic        string  Sí          Clave del tema (ej: "cancelaciones", "horarios")
+branch_id    number  No          ID de stock.warehouse (sucursal) para filtrar contexto
+
+── Prioridad con branch_id ──
+1. Registro específico de esa sucursal (branch_ids contiene branch_id)
+2. Registro global (branch_ids vacío)
+
+── Sin branch_id ──
+Primer registro activo con ese topic_key (ordenado por sequence)</field>
+        <field name="response_fields">status    string   "ok" | "error"
+topic     string   topic_key del registro encontrado
+name      string   Nombre descriptivo del tema
+content   string   Contenido completo → usar como contexto o enviar al cliente
+
+── Errores ──
+400  →  Parámetro "topic" faltante
+401  →  Token de autenticación inválido
+404  →  No existe registro activo con ese topic_key</field>
+        <field name="body_example">{
+  "jsonrpc": "2.0",
+  "method": "call",
+  "params": {
+    "topic": "cancelaciones",
+    "branch_id": 1
+  }
+}</field>
+        <field name="n8n_config_guide">── Tool HTTP Request (AI Agent) ──
+
+Nombre:      get_company_context
+Descripción: Consulta información configurable de la empresa: políticas, horarios,
+             T&amp;C, etc. Parámetro "topic" es la clave del tema.
+             Ejemplos: "cancelaciones", "horarios", "anticipos", "ubicaciones".
+
+Method:      POST
+URL:         https://[TU-ODOO]/api/n8n/appointment/context
+
+Body (JSON fields):
+  jsonrpc           →  2.0
+  method            →  call
+  params.topic      →  {{ $fromAI('topic','Clave del tema (cancelaciones|horarios|terminos|anticipos|ubicaciones)','string') }}
+  params.branch_id  →  {{ $fromAI('branch_id','ID de la sucursal/almacén (opcional, omitir para info global)','number') }}
+
+Headers:
+  Content-Type  →  application/json
+  X-N8N-Token   →  [tu-token-secreto]
+
+── System Prompt del agente ──
+
+Agrega esta instrucción a Valentina:
+
+  "Cuando el cliente pregunte sobre políticas de cancelación, horarios de atención,
+  términos y condiciones, anticipos, ubicaciones o cualquier información general
+  del salón, SIEMPRE consulta get_company_context con el topic_key correspondiente
+  antes de responder. No inventes información."
+
+── Topics sugeridos para configurar en Odoo ──
+
+  cancelaciones  →  Política de cancelaciones y reembolsos
+  horarios       →  Horarios de atención de cada sucursal
+  anticipos      →  Política de pago de anticipos (monto, cuándo se cobra)
+  terminos       →  Términos y condiciones generales del servicio
+  ubicaciones    →  Direcciones físicas, referencias y cómo llegar
+  contacto       →  Teléfonos, email, redes sociales del salón</field>
+    </record>
+
+</odoo>
