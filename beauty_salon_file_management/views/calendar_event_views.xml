@@ -95,6 +95,23 @@
                     <field name="inicio_real" readonly="1"/>
                     <field name="fin_real" readonly="1"/>
                 </group>
+                <group string="Disponibilidad" class="ps-cita-group"
+                       invisible="not appointment_type_id or not real_employee_id">
+                    <field name="slot_search_date"
+                           string="Buscar disponibilidad para el día"
+                           widget="date"/>
+                    <field name="selected_slot_id"
+                           string="Horario disponible"
+                           widget="radio"
+                           class="ps-slot-chips"
+                           domain="[('id', 'in', available_slot_ids)]"
+                           options="{'no_create': True, 'no_open': True}"
+                           invisible="not slot_search_date or not available_slot_ids"/>
+                    <field name="no_slots_message"
+                           readonly="1"
+                           invisible="not no_slots_message"/>
+                    <field name="available_slot_ids" invisible="1"/>
+                </group>
             </xpath>
 
         </field>
@@ -110,7 +127,7 @@
                   decoration-danger="appointment_status == 'concluded' and expediente_completado == False"
                   decoration-warning="appointment_status == 'attended'"
                   decoration-info="appointment_status == 'booked'"
-                  default_order="start desc">
+                  default_order="is_concluded_order asc, start desc">
                 <field name="start" string="Fecha/Hora"/>
                 <field name="name" string="Cita"/>
                 <field name="manual_customer_id" string="Clienta"/>
@@ -146,7 +163,7 @@
         <field name="name">calendar.event.file.kanban</field>
         <field name="model">calendar.event</field>
         <field name="arch" type="xml">
-            <kanban string="Citas de Hoy" class="o_kanban_mobile" default_order="start asc">
+            <kanban string="Citas de Hoy" class="o_kanban_mobile" default_order="is_concluded_order asc, start asc">
                 <field name="name"/>
                 <field name="manual_customer_id"/>
                 <field name="appointment_type_id"/>

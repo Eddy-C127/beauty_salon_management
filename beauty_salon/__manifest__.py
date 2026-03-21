@@ -22,11 +22,18 @@
         "sale_stock",
     ],
     "data": [
+        "security/ir.model.access.csv",
         "views/hr_employee_views.xml",
         "views/calendar_event_views.xml",
+        "views/slot_selector_wizard_views.xml",
         "views/appointment_type_views.xml",
         "views/sale_order_views.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "beauty_salon/static/src/css/slot_chips.css",
+        ],
+    },
     "demo": [],
     "auto_install": False,
     "application": False,

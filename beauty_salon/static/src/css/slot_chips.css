@@ -1,0 +1,62 @@
+/* ==========================================================
+   PS Slot Chips — widget="radio" convertido en chips táctiles
+   ========================================================== */
+
+/* Contenedor: flex wrap horizontal */
+.ps-slot-chips .o_radio_input {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+/* Ocultar el radio nativo y su label por defecto */
+.ps-slot-chips .o_radio_item {
+    display: flex;
+}
+
+.ps-slot-chips .o_radio_item input[type="radio"] {
+    display: none;
+}
+
+/* Cada label = chip siempre resaltado */
+.ps-slot-chips .o_radio_item label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    padding: 6px 14px;
+    border: 1.5px solid #c9b9d6;
+    border-radius: 20px;
+    background: #f3edf8;
+    color: #5a3d6b;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    user-select: none;
+    white-space: nowrap;
+}
+
+/* Hover */
+.ps-slot-chips .o_radio_item label:hover {
+    background: #e4d4f0;
+    border-color: #9b6bb5;
+}
+
+/* Seleccionado */
+.ps-slot-chips .o_radio_item input[type="radio"]:checked + label {
+    background: #7c3f99;
+    border-color: #7c3f99;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Móvil: chips más grandes y fáciles de tocar */
+@media (max-width: 768px) {
+    .ps-slot-chips .o_radio_item label {
+        min-width: 72px;
+        padding: 9px 16px;
+        font-size: 0.95rem;
+    }
+}

@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+    <record id="view_beauty_salon_slot_selector_form" model="ir.ui.view">
+        <field name="name">beauty_salon.slot.selector.form</field>
+        <field name="model">beauty_salon.slot.selector</field>
+        <field name="arch" type="xml">
+            <form string="Slots Disponibles">
+                <sheet>
+                    <!-- Header info card -->
+                    <div class="o_field_widget mb-3 p-3 rounded" style="background: linear-gradient(135deg, #6a0572, #a0126c); color: white;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="font-size: 2rem;">📅</div>
+                            <div>
+                                <div style="font-size: 1.1rem; font-weight: 700;">
+                                    <field name="selected_date" readonly="1" nolabel="1" widget="date"/>
+                                </div>
+                                <div style="font-size: 0.85rem; opacity: 0.9;">
+                                    <field name="real_employee_id" readonly="1" nolabel="1"/>
+                                    &amp;nbsp;·&amp;nbsp;
+                                    <field name="appointment_type_id" readonly="1" nolabel="1"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instrucción -->
+                    <div class="text-center mb-3" style="color: #666; font-size: 0.9rem;">
+                        Toca un horario para seleccionarlo
+                    </div>
+
+                    <!-- Grid de slots como botones touch -->
+                    <field name="available_slot_ids" nolabel="1" widget="one2many">
+                        <list create="false" delete="false" decoration-success="slot_label != False">
+                            <field name="slot_label" string="Horario disponible"/>
+                            <button name="action_select_this_slot"
+                                    type="object"
+                                    string="✓ Seleccionar"
+                                    class="btn btn-primary btn-sm"/>
+                        </list>
+                    </field>
+
+                </sheet>
+                <footer>
+                    <button string="Cancelar"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

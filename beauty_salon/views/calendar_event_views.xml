@@ -21,7 +21,7 @@
             </xpath>
 
             <!-- SOLO AGREGAR CAMPOS CUSTOM - NO TOCAR LOS NATIVOS -->
-            
+
             <!-- 1. Cliente (manual_customer_id) - ANTES de appointment_type_id -->
             <xpath expr="//field[@name='appointment_type_id']" position="before">
                 <field name="manual_customer_id"
@@ -30,13 +30,30 @@
                        placeholder="Buscar o crear cliente..."/>
             </xpath>
 
-            <!-- 2. Empleado Real - DESPUÉS de appointment_status -->
+            <!-- 2. Empleado Real DESPUÉS de appointment_status -->
             <xpath expr="//field[@name='appointment_status']" position="after">
-                <field name="real_employee_id" string="Empleado Real"/>
+                <field name="real_employee_id" 
+                    string="Empleado Real"
+                    domain="[('is_virtual_resource', '=', False), ('active', '=', True)]"/>
             </xpath>
 
-            <!-- 3. Orden de Venta - DESPUÉS de real_employee_id -->
+            <!-- 3. Buscar disponibilidad + Slots inline + Orden de Venta - DESPUÉS de real_employee_id -->
             <xpath expr="//field[@name='real_employee_id']" position="after">
+                <field name="slot_search_date"
+                       string="Buscar disponibilidad para el día"
+                       invisible="not appointment_type_id or not real_employee_id"
+                       widget="date"/>
+                <field name="selected_slot_id"
+                       string="Horario disponible"
+                       widget="radio"
+                       class="ps-slot-chips"
+                       domain="[('id', 'in', available_slot_ids)]"
+                       options="{'no_create': True, 'no_open': True}"
+                       invisible="not slot_search_date or not appointment_type_id or not real_employee_id or not available_slot_ids"/>
+                <field name="no_slots_message"
+                       readonly="1"
+                       invisible="not no_slots_message"/>
+                <field name="available_slot_ids" invisible="1"/>
                 <field name="sale_order_id"
                        readonly="1"
                        invisible="not sale_order_id"
@@ -80,8 +97,23 @@
                 <field name="real_employee_id" string="Empleado Real"/>
             </xpath>
 
-            <!-- 3. Orden de Venta DESPUÉS de real_employee_id -->
+            <!-- 3. Buscar disponibilidad + Slots inline + Orden de Venta DESPUÉS de real_employee_id -->
             <xpath expr="//field[@name='real_employee_id']" position="after">
+                <field name="slot_search_date"
+                       string="Buscar disponibilidad para el día"
+                       invisible="not appointment_type_id or not real_employee_id"
+                       widget="date"/>
+                <field name="selected_slot_id"
+                       string="Horario disponible"
+                       widget="radio"
+                       class="ps-slot-chips"
+                       domain="[('id', 'in', available_slot_ids)]"
+                       options="{'no_create': True, 'no_open': True}"
+                       invisible="not slot_search_date or not appointment_type_id or not real_employee_id or not available_slot_ids"/>
+                <field name="no_slots_message"
+                       readonly="1"
+                       invisible="not no_slots_message"/>
+                <field name="available_slot_ids" invisible="1"/>
                 <field name="sale_order_id"
                        readonly="1"
                        invisible="not sale_order_id"
