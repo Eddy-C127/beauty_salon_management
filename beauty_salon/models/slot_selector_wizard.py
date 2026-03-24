@@ -107,3 +107,26 @@ class BeautySalonSlotSelector(models.TransientModel):
     # Modo creación: datos pendientes del formulario (aún no guardados)
     pending_customer_id = fields.Many2one('res.partner', string='Cliente (pendiente)')
     pending_user_id = fields.Many2one('res.users', string='Usuario (pendiente)')
+
+
+class BeautySalonOverlapConfirm(models.TransientModel):
+    """
+    Wizard de confirmación de solapamiento.
+    Se abre cuando el write() detecta que el empleado ya tiene una cita en ese horario.
+    El usuario puede continuar (forzar guardado) o cancelar.
+    """
+    _name = 'beauty_salon.overlap.confirm'
+    _description = 'Confirmar cita solapada'
+
+    calendar_event_id = fields.Many2one('calendar.event', string='Cita', required=True)
+    conflict_message = fields.Text(string='Detalle del conflicto', readonly=True)
+    pending_vals = fields.Text(string='Valores pendientes (JSON)', readonly=True)
+
+    def action_confirm(self):
+        """El usuario elige continuar — guarda con skip_overlap_check."""
+        self.ensure_one()
+        import json as _json
+        vals = _json.loads(self.pending_vals or '{}')
+        if vals and self.calendar_event_id:
+            self.calendar_event_id.with_context(skip_overlap_check=True).write(vals)
+        return {'type': 'ir.actions.act_window_close'}

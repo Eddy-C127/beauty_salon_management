@@ -87,6 +87,12 @@ class CalendarEvent(models.Model):
         store=False,
     )
 
+    overlap_warning = fields.Char(
+        string='',
+        store=False,
+        readonly=True,
+    )
+
     # ===== COMPUTE METHODS =====
 
     @api.depends('slot_search_date', 'available_slot_ids')
@@ -292,6 +298,32 @@ class CalendarEvent(models.Model):
                         f'✅ Vendedor actualizado en SO #{so.name} (onchange): '
                         f'{self.real_employee_id.user_id.id}'
                     )
+
+    @api.onchange('real_employee_id', 'start', 'stop')
+    def onchange_check_overlap_warning(self):
+        """Muestra advertencia visual si el empleado ya tiene una cita en ese horario."""
+        self.overlap_warning = False
+        if not self.real_employee_id or not self.start or not self.stop:
+            return
+        if hasattr(self.start, 'year') and self.start.year >= 2099:
+            return
+        exclude_id = self._origin.id if self._origin and self._origin.id else False
+        conflict = self._check_employee_overlap(
+            self.real_employee_id.id, self.start, self.stop, exclude_id=exclude_id
+        )
+        if conflict:
+            customer = conflict.manual_customer_id or conflict.partner_id
+            import pytz as _pytz
+            try:
+                tz = _pytz.timezone('America/Monterrey')
+                start_local = _pytz.utc.localize(conflict.start).astimezone(tz)
+                fecha = start_local.strftime('%d/%m/%Y %H:%M')
+            except Exception:
+                fecha = str(conflict.start)
+            self.overlap_warning = (
+                f'⚠️  Horario ocupado — "{conflict.name}" '
+                f'({customer.name if customer else "sin cliente"}) · {fecha}'
+            )
 
     @api.onchange('slot_search_date', 'real_employee_id', 'appointment_type_id')
     def onchange_slot_search_date(self):
@@ -538,30 +570,6 @@ class CalendarEvent(models.Model):
                     'Debes seleccionar un horario disponible antes de guardar.\n\n'
                     'Usa el campo "Buscar disponibilidad para el día" para elegir un slot.'
                 )
-
-        # COMPONENTE D: Validar solapamiento ANTES de guardar
-        # skip_overlap_check=True lo pone el wizard de slots (el motor nativo ya garantiza disponibilidad)
-        if not self.env.context.get('skip_overlap_check') and any(k in vals for k in ['real_employee_id', 'start', 'stop']):
-            for event in self:
-                new_emp_id = vals.get('real_employee_id', event.real_employee_id.id)
-                new_start = vals.get('start', event.start)
-                new_stop = vals.get('stop', event.stop)
-
-                # Solo validar si realmente cambió algo relevante
-                emp_changed = 'real_employee_id' in vals and vals['real_employee_id'] != event.real_employee_id.id
-                start_changed = 'start' in vals and vals['start'] != event.start
-                stop_changed = 'stop' in vals and vals['stop'] != event.stop
-
-                if not (emp_changed or start_changed or stop_changed):
-                    continue
-
-                if new_emp_id and new_start and new_stop:
-                    conflict = self._check_employee_overlap(new_emp_id, new_start, new_stop, exclude_id=event.id)
-                    if conflict:
-                        _logger.warning(
-                            f"[beauty_salon] Solapamiento detectado en cita #{event.id}: "
-                            f"{self._format_conflict_message(conflict)}"
-                        )
 
         # COMPONENTE A: Capturar empleado anterior ANTES del super() para poder comparar
         old_employees = {}

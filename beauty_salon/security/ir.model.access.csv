@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_beauty_salon_slot_selector,beauty_salon.slot.selector,model_beauty_salon_slot_selector,base.group_user,1,1,1,1
 access_beauty_salon_slot_line,beauty_salon.slot.line,model_beauty_salon_slot_line,base.group_user,1,1,1,1
 access_beauty_salon_event_slot_line,beauty_salon.event_slot_line,model_beauty_salon_event_slot_line,base.group_user,1,1,1,1
+access_beauty_salon_overlap_confirm,beauty_salon.overlap.confirm,model_beauty_salon_overlap_confirm,base.group_user,1,1,1,1

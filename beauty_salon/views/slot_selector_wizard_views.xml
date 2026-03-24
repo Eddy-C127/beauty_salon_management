@@ -50,4 +50,45 @@
         </field>
     </record>
 
+
+    <record id="view_beauty_salon_overlap_confirm_form" model="ir.ui.view">
+        <field name="name">beauty_salon.overlap.confirm.form</field>
+        <field name="model">beauty_salon.overlap.confirm</field>
+        <field name="arch" type="xml">
+            <form string="⚠️ Cita solapada">
+                <sheet>
+                    <div class="o_field_widget mb-3 p-3 rounded"
+                         style="background: #fff8e1; border: 1.5px solid #f9a825; border-radius: 8px;">
+                        <div class="d-flex align-items-start gap-2">
+                            <span style="font-size: 1.4rem; line-height: 1.2;">⚠️</span>
+                            <div>
+                                <div style="font-weight: 700; color: #b45309; margin-bottom: 4px;">
+                                    Horario ocupado
+                                </div>
+                                <field name="conflict_message"
+                                       readonly="1"
+                                       nolabel="1"
+                                       style="color: #4b3800; font-size: 0.9rem; white-space: pre-wrap;"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="color: #555; font-size: 0.88rem; margin-top: 4px;">
+                        📋 Puedes continuar si el negocio lo permite (p. ej. agendar modelos).
+                    </div>
+                    <field name="calendar_event_id" invisible="1"/>
+                    <field name="pending_vals" invisible="1"/>
+                </sheet>
+                <footer>
+                    <button name="action_confirm"
+                            string="✅ Continuar de todas formas"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="↩ Cancelar"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
 </odoo>

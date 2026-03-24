@@ -39,6 +39,10 @@
 
             <!-- 3. Buscar disponibilidad + Slots inline + Orden de Venta - DESPUÉS de real_employee_id -->
             <xpath expr="//field[@name='real_employee_id']" position="after">
+                <field name="overlap_warning"
+                       readonly="1"
+                       invisible="not overlap_warning"
+                       style="color: #b45309; background: #fff8e1; border: 1px solid #f9a825; border-radius: 6px; padding: 6px 10px; display: block;"/>
                 <field name="slot_search_date"
                        string="Buscar disponibilidad para el día"
                        invisible="not appointment_type_id or not real_employee_id"
@@ -99,6 +103,10 @@
 
             <!-- 3. Buscar disponibilidad + Slots inline + Orden de Venta DESPUÉS de real_employee_id -->
             <xpath expr="//field[@name='real_employee_id']" position="after">
+                <field name="overlap_warning"
+                       readonly="1"
+                       invisible="not overlap_warning"
+                       style="color: #b45309; background: #fff8e1; border: 1px solid #f9a825; border-radius: 6px; padding: 6px 10px; display: block;"/>
                 <field name="slot_search_date"
                        string="Buscar disponibilidad para el día"
                        invisible="not appointment_type_id or not real_employee_id"
