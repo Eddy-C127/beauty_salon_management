@@ -558,7 +558,10 @@ class CalendarEvent(models.Model):
                 if new_emp_id and new_start and new_stop:
                     conflict = self._check_employee_overlap(new_emp_id, new_start, new_stop, exclude_id=event.id)
                     if conflict:
-                        raise UserError(self._format_conflict_message(conflict))
+                        _logger.warning(
+                            f"[beauty_salon] Solapamiento detectado en cita #{event.id}: "
+                            f"{self._format_conflict_message(conflict)}"
+                        )
 
         # COMPONENTE A: Capturar empleado anterior ANTES del super() para poder comparar
         old_employees = {}
